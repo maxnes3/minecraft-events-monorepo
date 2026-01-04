@@ -1,0 +1,15 @@
+# Directories
+node_modules/
+dist/
+test/
+.git/
+scripts/
+docker/
+
+# Files
+.gitignore
+Dockerfile
+docker-compose.local.yaml
+.DS_Store
+.env
+README.md
