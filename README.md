@@ -1,3 +1,3 @@
 # Minecraft Events
 
-## [Docs for build up backend](./README.md)
+## [Docs for build up backend](./backend/README.md)
