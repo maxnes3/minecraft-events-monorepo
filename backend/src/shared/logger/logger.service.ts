@@ -2,23 +2,23 @@ import { ConsoleLogger, Injectable, Scope } from '@nestjs/common';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class LoggerService extends ConsoleLogger {
-  log(message: string, context?: string) {
+  public log(message: string, context?: string): void {
     super.log(message, context || this.context);
   }
 
-  error(message: string, stack?: string, context?: string) {
+  public error(message: string, stack?: string, context?: string): void {
     super.error(message, stack, context || this.context);
   }
 
-  warn(message: string, context?: string) {
+  public warn(message: string, context?: string): void {
     super.warn(message, context || this.context);
   }
 
-  debug(message: string, context?: string) {
+  public debug(message: string, context?: string): void {
     super.debug(message, context || this.context);
   }
 
-  verbose(message: string, context?: string) {
+  public verbose(message: string, context?: string): void {
     super.verbose(message, context || this.context);
   }
 }

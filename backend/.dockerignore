@@ -8,8 +8,7 @@ docker/
 
 # Files
 .gitignore
-Dockerfile
-docker-compose.local.yaml
 .DS_Store
 .env
 README.md
+.dockerignore

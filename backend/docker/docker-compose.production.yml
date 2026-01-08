@@ -10,10 +10,9 @@ services:
     env_file:
       - path: ./.env.common
         required: true
-      - path: ./.env.local
+      - path: ./.env.production
         required: true
     volumes:
-      - ../:/app
       - /app/node_modules
     working_dir: /app
     command: pnpm run start:dev

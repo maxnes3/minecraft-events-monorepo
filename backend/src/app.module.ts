@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { LoggerModule } from './logger';
+import { LoggerModule } from './shared/logger';
+import { HttpModule } from './shared/http';
+import { TwitchModule } from './twitch';
+import { EventsModule } from './events';
 
 @Module({
-  imports: [LoggerModule],
-  controllers: [],
-  providers: []
+  imports: [HttpModule, LoggerModule, TwitchModule, EventsModule]
 })
 export class AppModule {}

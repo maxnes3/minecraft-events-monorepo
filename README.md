@@ -1,1 +1,3 @@
-# Minecraft-Events-Monorepo
+# Minecraft Events
+
+## [Docs for build up backend](./README.md)
