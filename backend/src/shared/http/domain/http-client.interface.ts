@@ -25,12 +25,4 @@ export interface IHttpClient {
     url: string,
     config?: HttpRequestConfig
   ): Promise<HttpResponse<T>>;
-
-  setDefaultHeader(key: string, value: string): void;
-  setDefaultHeaders(headers: Record<string, string>): void;
-  removeDefaultHeader(key: string): void;
-  clearDefaultHeaders(): void;
-
-  setDefaultConfig(config: Partial<HttpRequestConfig>): void;
-  clearDefaultConfig(): void;
 }

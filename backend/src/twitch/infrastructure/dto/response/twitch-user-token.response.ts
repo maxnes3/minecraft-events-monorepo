@@ -1,4 +1,4 @@
-export interface TwitchUserTokenResponse {
+export class TwitchUserTokenResponse {
   access_token: string;
   refresh_token: string;
   expires_in: number;

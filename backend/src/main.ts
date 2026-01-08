@@ -21,7 +21,7 @@ async function bootstrap() {
     app,
     document,
     {
-      swaggerOptions: { docExpansion: 'none', showRequestDuration: true }
+      swaggerOptions: { docExpansion: 'list', showRequestDuration: true }
     }
   );
 

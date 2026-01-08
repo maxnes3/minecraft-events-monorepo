@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  Res
+} from '@nestjs/common';
 import { TwitchPlatformService } from '../infrastructure/twitch-platform.service';
 import { LoggerService } from '@/shared/logger';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -17,6 +25,7 @@ export class TwitchAuthController {
 
   @ApiOperation({ summary: 'Authenticate the app with Twitch' })
   @Post('app')
+  @HttpCode(200)
   public async getAppToken() {
     this.logger.debug('Requesting app access token');
     const token = await this.twitchService.getAppToken();
@@ -48,6 +57,11 @@ export class TwitchAuthController {
     required: false,
     description: 'Error code if failed'
   })
+  @ApiQuery({
+    name: 'error_description',
+    required: false,
+    description: 'Error description if failed'
+  })
   @Get('callback')
   public async authCallback(
     @Query('code') code: string,
@@ -77,8 +91,9 @@ export class TwitchAuthController {
 
   @ApiOperation({ summary: 'Refresh Twitch user tokens' })
   @Post('refresh')
+  @HttpCode(200)
   public async refreshUserTokens(
-    @Body(publicRuntimeConfig.twitch.refreshTokenName) refreshToken: string
+    @Query(publicRuntimeConfig.twitch.refreshTokenName) refreshToken: string
   ) {
     const tokens = await this.twitchService.refreshUserToken(refreshToken);
     this.logger.debug('Twitch user tokens refreshed successfully');
