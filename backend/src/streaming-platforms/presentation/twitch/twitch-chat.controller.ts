@@ -1,9 +1,9 @@
 import { Body, Controller, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { TwitchPlatformService } from '../infrastructure/twitch-platform.service';
 import { LoggerService } from '@/shared/logger';
-import { TwitchChatAnnouncementRequest } from '../infrastructure/dto/request/twitch-chat-announcment.request';
 import { publicRuntimeConfig } from '@/shared/config';
+import { TwitchChatAnnouncementDTO } from '../../infrastructure/twitch/dto/request/twitch-chat-announcment.request';
+import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
 
 @ApiTags('Twitch Chat')
 @Controller('twitch/chat')
@@ -20,9 +20,13 @@ export class TwitchChatController {
   @HttpCode(200)
   public async sendChatAnnouncement(
     @Query(publicRuntimeConfig.twitch.accessTokenName) accessToken: string,
-    @Body() data: TwitchChatAnnouncementRequest
+    @Query(publicRuntimeConfig.twitch.broadcasterIdName) broadcasterId: string,
+    @Body() data: TwitchChatAnnouncementDTO
   ) {
     this.logger.debug('Sending chat announcement via TwitchPlatformService');
-    await this.twitchService.sendChatAnnouncement(accessToken, data);
+    await this.twitchService.sendChatAnnouncement(data, {
+      accessToken,
+      broadcasterId
+    });
   }
 }

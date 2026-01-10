@@ -1,13 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Post,
-  Query,
-  Res
-} from '@nestjs/common';
-import { TwitchPlatformService } from '../infrastructure/twitch-platform.service';
+import { Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
+import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
 import { LoggerService } from '@/shared/logger';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { publicRuntimeConfig } from '@/shared/config';
@@ -39,10 +31,10 @@ export class TwitchAuthController {
 
   @ApiOperation({ summary: 'Redirect to Twitch authorization URL' })
   @Get('redirect')
-  public redirectToTwitchAuth(@Res() res: Response) {
+  public redirectToTwitchAuth(@Res() response: Response) {
     const redirectUrl = this.twitchService.getAuthUrl();
     this.logger.debug(`Redirecting to Twitch auth URL: ${redirectUrl}`);
-    res.redirect(redirectUrl);
+    response.redirect(redirectUrl);
   }
 
   @ApiOperation({ summary: 'Twitch authorization callback' })
@@ -68,25 +60,31 @@ export class TwitchAuthController {
     @Query('state') state: string,
     @Query('error') error: string,
     @Query('error_description') errorDescription: string,
-    @Res() res: Response
+    @Res() response: Response
   ) {
     if (error) {
       this.logger.error(`Twitch OAuth error: ${error} - ${errorDescription}`);
-      res.redirect(`/error?message=${encodeURIComponent(errorDescription)}`);
+      response.redirect(
+        `/error?message=${encodeURIComponent(errorDescription)}`
+      );
       return;
     }
 
     const tokens = await this.twitchService.exchangeCodeToToken(code);
     this.logger.debug('Twitch OAuth successful, obtained user token');
 
-    const userData = await this.twitchService.getUser(tokens.access_token);
+    const userData = await this.twitchService.getUser({
+      accessToken: tokens.access_token
+    });
     this.logger.debug('Twitch user data get successful');
 
     if (!publicRuntimeConfig.clients.frontendUrl) {
-      this.logger.error('Frontend URL is not configured, redirect failed');
-      res.redirect(`/success?message=${JSON.stringify(userData)}`);
+      this.logger.warn('Frontend URL is not configured');
+      response.redirect(`/${publicRuntimeConfig.application.apiPrefix}`);
       return;
     }
+    this.logger.debug('Redirect to Frontend URL');
+    response.redirect(publicRuntimeConfig.clients.frontendUrl);
   }
 
   @ApiOperation({ summary: 'Refresh Twitch user tokens' })

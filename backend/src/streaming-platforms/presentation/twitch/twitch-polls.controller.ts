@@ -1,8 +1,8 @@
 import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { TwitchPlatformService } from '../infrastructure/twitch-platform.service';
+import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
 import { LoggerService } from '@/shared/logger';
-import { TwitchStartPollRequest } from '../infrastructure/dto/request/twitch-start-poll.request';
+import { TwitchStartPollRequest } from '../../infrastructure/twitch/dto/request/twitch-start-poll.request';
 import { publicRuntimeConfig } from '@/shared/config';
 
 @ApiTags('Twitch Polls')
@@ -20,8 +20,8 @@ export class TwitchPollsController {
   @HttpCode(200)
   public async getActivePoll(
     @Query(publicRuntimeConfig.twitch.accessTokenName) accessToken: string,
-    @Query('pollId') pollId: string,
-    @Query('broadcasterId') broadcasterId: string
+    @Query(publicRuntimeConfig.twitch.broadcasterIdName) broadcasterId: string,
+    @Query('pollId') pollId: string
   ) {
     this.logger.debug('Fetching active polls via TwitchPlatformService');
     const poll = await this.twitchService.getPoll(

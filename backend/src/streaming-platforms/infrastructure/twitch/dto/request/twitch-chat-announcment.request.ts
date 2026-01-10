@@ -1,14 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TwitchAnnouncementColor } from '../twitch.enums';
+import { IChatAnnouncementDTO } from '@/streaming-platforms/domain/dto/chat-announcement.interface';
 
-export class TwitchChatAnnouncementRequest {
-  @ApiProperty({
-    description: 'Broadcaster ID where the announcement will be sent',
-    required: true,
-    type: String
-  })
-  broadcasterId: string;
-
+export class TwitchChatAnnouncementDTO implements IChatAnnouncementDTO {
   @ApiProperty({
     description: 'Announcement message content',
     required: true,
@@ -23,5 +17,5 @@ export class TwitchChatAnnouncementRequest {
     enum: TwitchAnnouncementColor,
     default: TwitchAnnouncementColor.PRIMARY
   })
-  color: TwitchAnnouncementColor;
+  color?: TwitchAnnouncementColor = TwitchAnnouncementColor.PRIMARY;
 }

@@ -14,10 +14,18 @@ export const publicRuntimeConfig = {
     idUrl: process.env.NESTJS_TWITCH_ID_URL || '',
     apiUrl: process.env.NESTJS_TWITCH_API_URL || '',
     redirectUrl: process.env.NESTJS_TWITCH_REDIRECT_URI || '',
+    authScopes: process.env.NESTJS_TWITCH_AUTH_SCOPES?.split(',') || [],
     accessTokenName: process.env.NESTJS_TWITCH_ACCESS_TOKEN_NAME || '',
-    refreshTokenName: process.env.NESTJS_TWITCH_REFRESH_TOKEN_NAME || ''
+    refreshTokenName: process.env.NESTJS_TWITCH_REFRESH_TOKEN_NAME || '',
+    broadcasterIdName: process.env.NESTJS_TWITCH_BROADCASTER_ID_NAME || ''
   },
   clients: {
     frontendUrl: process.env.NESTJS_FRONTEND_URL || ''
+  },
+  i18n: {
+    fallbackLanguage: process.env.NESTJS_I18N_FALLBACK_LANGUAGE || 'en',
+    supportedLanguages: process.env.NESTJS_I18N_SUPPORTED_LANGUAGES?.split(
+      ','
+    ) || ['en']
   }
 };

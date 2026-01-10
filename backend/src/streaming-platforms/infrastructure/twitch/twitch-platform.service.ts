@@ -5,16 +5,18 @@ import { publicRuntimeConfig } from '@/shared/config';
 import { TwitchAppTokenResponse } from './dto/response/twitch-app-token.response';
 import { TwitchUserTokenResponse } from './dto/response/twitch-user-token.response';
 import { TwitchUserResponse } from './dto/response/twitch-user.response';
-import { TwitchChatAnnouncementRequest } from './dto/request/twitch-chat-announcment.request';
+import { TwitchChatAnnouncementDTO } from './dto/request/twitch-chat-announcment.request';
 import { TwitchStartPollRequest } from './dto/request/twitch-start-poll.request';
 import {
   TwitchPollData,
   TwitchPollResponse
 } from './dto/response/twitch-poll.response';
 import { TwitchBroadcasterType } from './dto/twitch.enums';
+import { TwitchAuthDTO } from './dto/twitch-auth.dto';
+import { IStreamingPlatformService } from '../../domain/streaming-platform-service.interface';
 
 @Injectable()
-export class TwitchPlatformService {
+export class TwitchPlatformService implements IStreamingPlatformService {
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly redirectUrl: string;
@@ -64,17 +66,12 @@ export class TwitchPlatformService {
 
   public getAuthUrl(): string {
     const authUrl = new URL(`${this.idUrl}/oauth2/authorize`);
-    const defaultScopes = [
-      'channel:manage:broadcast' /* Manage broadcast settings */,
-      'channel:manage:polls' /* Manage polls rights */,
-      'moderator:manage:announcements' /* Manage announcement rights */
-    ];
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: this.redirectUrl,
       response_type: 'code',
       force_verify: 'true',
-      scope: defaultScopes.join(' ')
+      scope: publicRuntimeConfig.twitch.authScopes.join(' ')
     });
 
     authUrl.search = params.toString();
@@ -146,11 +143,11 @@ export class TwitchPlatformService {
     }
   }
 
-  public async getUser(accessToken: string): Promise<TwitchUserResponse> {
+  public async getUser(authData: TwitchAuthDTO): Promise<TwitchUserResponse> {
     const userUrl = `${this.apiUrl}/helix/users`;
     const config: HttpRequestConfig = {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${authData.accessToken}`,
         'Client-Id': this.clientId
       }
     };
@@ -166,6 +163,42 @@ export class TwitchPlatformService {
     } catch (error) {
       this.logger.error('Failed to get user data', error);
       throw new Error(`Twitch get user failed: ${error}`);
+    }
+  }
+
+  public async sendChatAnnouncement(
+    data: TwitchChatAnnouncementDTO,
+    authData: TwitchAuthDTO
+  ): Promise<void> {
+    if (!authData.broadcasterId) {
+      return;
+    }
+
+    const chatAnnouncementUrl = `${this.apiUrl}/helix/chat/announcements`;
+    const params = {
+      broadcaster_id: authData.broadcasterId,
+      moderator_id: authData.broadcasterId
+    };
+    const body = {
+      message: data.message,
+      color: data.color
+    };
+    const config: HttpRequestConfig = {
+      headers: {
+        Authorization: `Bearer ${authData.accessToken}`,
+        'Client-Id': this.clientId,
+        'Content-Type': 'application/json'
+      },
+      params
+    };
+
+    this.logger.debug('Sending chat announcement to Twitch channel');
+    try {
+      await this.httpClient.post<void>(chatAnnouncementUrl, body, config);
+      this.logger.debug('Chat announcement sent successfully');
+    } catch (error) {
+      this.logger.error('Failed to send chat announcement', error);
+      throw new Error(`Twitch send chat announcement failed: ${error}`);
     }
   }
 
@@ -243,38 +276,6 @@ export class TwitchPlatformService {
     } catch (error) {
       this.logger.error('Failed to start poll', error);
       throw new Error(`Twitch start poll failed: ${error}`);
-    }
-  }
-
-  public async sendChatAnnouncement(
-    accessToken: string,
-    data: TwitchChatAnnouncementRequest
-  ): Promise<void> {
-    const chatAnnouncementUrl = `${this.apiUrl}/helix/chat/announcements`;
-    const params = {
-      broadcaster_id: data.broadcasterId,
-      moderator_id: data.broadcasterId
-    };
-    const body = {
-      message: data.message,
-      color: data.color
-    };
-    const config: HttpRequestConfig = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Client-Id': this.clientId,
-        'Content-Type': 'application/json'
-      },
-      params
-    };
-
-    this.logger.debug('Sending chat announcement to Twitch channel');
-    try {
-      await this.httpClient.post<void>(chatAnnouncementUrl, body, config);
-      this.logger.debug('Chat announcement sent successfully');
-    } catch (error) {
-      this.logger.error('Failed to send chat announcement', error);
-      throw new Error(`Twitch send chat announcement failed: ${error}`);
     }
   }
 }

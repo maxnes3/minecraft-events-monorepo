@@ -1,10 +1,17 @@
 import { Module } from '@nestjs/common';
 import { LoggerModule } from './shared/logger';
 import { HttpModule } from './shared/http';
-import { TwitchModule } from './twitch';
+import { I18nModule } from './shared/i18n';
+import { StreamingPlatformsModule } from './streaming-platforms';
 import { EventsModule } from './events';
 
 @Module({
-  imports: [HttpModule, LoggerModule, TwitchModule, EventsModule]
+  imports: [
+    HttpModule,
+    LoggerModule,
+    I18nModule,
+    StreamingPlatformsModule,
+    EventsModule
+  ]
 })
 export class AppModule {}

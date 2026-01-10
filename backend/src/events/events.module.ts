@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
+import { StreamingPlatformsModule } from '@/streaming-platforms';
 import { EventsController } from './presentation/events.controller';
 import { EventsService } from './application/events.service';
-import { TwitchModule } from '@/twitch';
 
 @Module({
-  imports: [TwitchModule],
+  imports: [StreamingPlatformsModule],
   controllers: [EventsController],
-  providers: [EventsService],
-  exports: []
+  providers: [EventsService]
 })
 export class EventsModule {}
