@@ -1,10 +1,10 @@
-import { TwitchBroadcasterType } from '../twitch.enums';
+import { TwitchBroadcasterType } from './twitch.enums';
 
-export class TwitchUserResponse {
-  data: TwitchUserDTO[];
+export class TwitchApiUserResponse {
+  data: TwitchApiUserDTO[];
 }
 
-export class TwitchUserDTO {
+export class TwitchApiUserDTO {
   broadcaster_type: TwitchBroadcasterType;
   created_at: string;
   description: string;

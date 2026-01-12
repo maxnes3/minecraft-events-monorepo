@@ -1,18 +1,21 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
   Post,
+  Put,
   Query
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { publicRuntimeConfig } from '@/shared/config';
 import { formatedHttpResponse } from '@/shared/http';
 import { EventsService } from '../application/events.service';
 import { EventAnnouncementDTO } from '../application/dto/event-announcement.dto';
 import { EventCreateDTO } from '../application/dto/event-create.dto';
+import { EventUpdateDTO } from '../application/dto/event-update.dto';
 
 @ApiTags('Events')
 @Controller('events')
@@ -20,6 +23,7 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @ApiOperation({ summary: 'Get event by id' })
+  @ApiParam({ name: 'id', description: 'Event Id', type: String })
   @Get('/:id')
   @HttpCode(200)
   public async getEventById(@Param('id') eventId: string) {
@@ -31,6 +35,7 @@ export class EventsController {
   }
 
   @ApiOperation({ summary: 'Get events by user id' })
+  @ApiParam({ name: 'id', description: 'User Id', type: String })
   @Get('/user/:id')
   @HttpCode(200)
   public async getEventsByUserId(@Param('id') userId: string) {
@@ -52,7 +57,20 @@ export class EventsController {
     return formatedHttpResponse({ success: true, data: event });
   }
 
+  @ApiOperation({ summary: 'Update event by id' })
+  @ApiParam({ name: 'id', description: 'Event Id', type: String })
+  @Put('/:id')
+  @HttpCode(200)
+  public async updateEvent(@Param('id') eventId: string, data: EventUpdateDTO) {
+    const event = await this.eventsService.updateEventById(eventId, data);
+    if (!event) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({ success: true, data: event });
+  }
+
   @ApiOperation({ summary: 'Start event' })
+  @ApiParam({ name: 'id', description: 'Event Id', type: String })
   @Post('/:id/start')
   @HttpCode(200)
   public async startEvent(
@@ -66,6 +84,7 @@ export class EventsController {
   }
 
   @ApiOperation({ summary: 'Complete event' })
+  @ApiParam({ name: 'id', description: 'Event Id', type: String })
   @Post('/:id/complete')
   @HttpCode(200)
   public async completeEvent(
@@ -91,6 +110,15 @@ export class EventsController {
       data,
       authData
     );
+    return formatedHttpResponse({ success });
+  }
+
+  @ApiOperation({ summary: 'Delete event by id' })
+  @ApiParam({ name: 'id', description: 'Event Id', type: String })
+  @Delete('/:id')
+  @HttpCode(200)
+  public async deleteEventById(@Param('id') eventId: string) {
+    const success = await this.eventsService.deleteEventById(eventId);
     return formatedHttpResponse({ success });
   }
 }

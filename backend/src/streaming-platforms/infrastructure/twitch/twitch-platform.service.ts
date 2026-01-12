@@ -1,21 +1,15 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { LoggerService } from '@/shared/logger';
 import { HttpClient, HttpRequestConfig } from '@/shared/http';
 import { publicRuntimeConfig } from '@/shared/config';
-import { TwitchUserTokenDTO } from './dto/response/twitch-user-token.dto';
-import {
-  TwitchUserDTO,
-  TwitchUserResponse
-} from './dto/response/twitch-user.dto';
-import { TwitchChatAnnouncementDTO } from './dto/request/twitch-chat-announcment.request';
-import { TwitchStartPollRequest } from './dto/request/twitch-start-poll.request';
-import {
-  TwitchPollDTO,
-  TwitchPollResponse
-} from './dto/response/twitch-poll.response';
-import { TwitchBroadcasterType } from './dto/twitch.enums';
+import { TwitchApiUserTokensDTO } from './dto/twitch-api-user-token.dto';
+import { TwitchApiUserResponse } from './dto/twitch-api-user.dto';
+import { TwitchChatAnnouncementDTO } from './dto/twitch-chat-announcment.request';
 import { TwitchAuthDTO } from './dto/twitch-auth.dto';
 import { IStreamingPlatformService } from '../../domain/streaming-platform-service.interface';
+import { TwitchTokensDTO } from './dto/twitch-tokens.dto';
+import { TwitchMapper } from './mappers/twitch.mappers';
+import { TwitchUserDTO } from './dto/twitch-user.dto';
 
 @Injectable()
 export class TwitchPlatformService implements IStreamingPlatformService {
@@ -26,6 +20,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
   private readonly apiUrl: string;
 
   constructor(
+    private readonly twitchMapper: TwitchMapper,
     private readonly httpClient: HttpClient,
     private readonly logger: LoggerService
   ) {
@@ -38,11 +33,11 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     this.logger.setContext(TwitchPlatformService.name);
   }
 
-  public getAuthUrl(): string {
+  public getAuthUrl(redirectUrl?: string): string {
     const authUrl = new URL(`${this.idUrl}/oauth2/authorize`);
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: this.redirectUrl,
+      redirect_uri: redirectUrl || this.redirectUrl,
       response_type: 'code',
       force_verify: 'true',
       scope: publicRuntimeConfig.twitch.authScopes.join(' ')
@@ -52,7 +47,9 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     return authUrl.toString();
   }
 
-  public async exchangeCodeToToken(code: string): Promise<TwitchUserTokenDTO> {
+  public async exchangeCodeToToken(
+    code: string
+  ): Promise<TwitchApiUserTokensDTO> {
     const tokenUrl = `${this.idUrl}/oauth2/token`;
     const params = new URLSearchParams({
       client_id: this.clientId,
@@ -69,7 +66,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
     this.logger.debug('Exchanging authorization code for user token');
     try {
-      const response = await this.httpClient.post<TwitchUserTokenDTO>(
+      const response = await this.httpClient.post<TwitchApiUserTokensDTO>(
         tokenUrl,
         params.toString(),
         config
@@ -84,7 +81,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
   public async refreshUserToken(
     refreshToken: string
-  ): Promise<TwitchUserTokenDTO> {
+  ): Promise<TwitchTokensDTO> {
     const tokenUrl = `${this.idUrl}/oauth2/token`;
     const params = new URLSearchParams({
       client_id: this.clientId,
@@ -100,7 +97,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
     this.logger.debug('Refreshing Twitch user token');
     try {
-      const response = await this.httpClient.post<TwitchUserTokenDTO>(
+      const response = await this.httpClient.post<TwitchApiUserTokensDTO>(
         tokenUrl,
         params.toString(),
         config
@@ -108,7 +105,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
       this.logger.debug(
         `Refreshed token data: ${JSON.stringify(response.data)}`
       );
-      return response.data;
+      return this.twitchMapper.toStreamingPlatformTokensDTO(response.data);
     } catch (error) {
       this.logger.error('Failed to refresh user token', error);
       throw new Error(`Twitch token refresh failed: ${error}`);
@@ -126,12 +123,14 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
     this.logger.debug('Fetching user data from Twitch API');
     try {
-      const response = await this.httpClient.get<TwitchUserResponse>(
+      const response = await this.httpClient.get<TwitchApiUserResponse>(
         userUrl,
         config
       );
       this.logger.debug(`User data: ${JSON.stringify(response.data)}`);
-      return response.data.data[0];
+      return this.twitchMapper.toStreamingPlatformUserDTO(
+        response.data.data[0]
+      );
     } catch (error) {
       this.logger.error('Failed to get user data', error);
       throw new Error(`Twitch get user failed: ${error}`);
@@ -172,83 +171,6 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     } catch (error) {
       this.logger.error('Failed to send chat announcement', error);
       throw new Error(`Twitch send chat announcement failed: ${error}`);
-    }
-  }
-
-  public async getPoll(
-    accessToken: string,
-    broadcasterId: string,
-    pollId: string
-  ): Promise<TwitchPollDTO> {
-    const pollUrl = `${this.apiUrl}/helix/polls`;
-    const params = {
-      broadcaster_id: broadcasterId,
-      id: pollId
-    };
-    const config: HttpRequestConfig = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Client-Id': this.clientId
-      },
-      params
-    };
-
-    this.logger.debug('Fetching active poll from Twitch channel');
-    try {
-      const response = await this.httpClient.get<TwitchPollResponse>(
-        pollUrl,
-        config
-      );
-      this.logger.debug(`Poll data: ${JSON.stringify(response.data)}`);
-      return response.data.data[0];
-    } catch (error) {
-      this.logger.error('Failed to get active poll', error);
-      throw new Error(`Twitch get poll failed: ${error}`);
-    }
-  }
-
-  public async startPoll(
-    accessToken: string,
-    data: TwitchStartPollRequest
-  ): Promise<TwitchPollDTO> {
-    if (data.broadcasterType === TwitchBroadcasterType.NONE) {
-      this.logger.error(
-        'Broadcaster is not affiliate or partner, cannot start poll'
-      );
-      throw new ForbiddenException(
-        'Twitch broadcaster must be an affiliate or partner to start polls'
-      );
-    }
-
-    const pollUrl = `${this.apiUrl}/helix/polls`;
-    const body = {
-      broadcaster_id: data.broadcasterId,
-      title: data.title,
-      choices: data.choices,
-      duration: data.duration,
-      channel_points_voting_enabled: data.channelPointsVotingEnabled,
-      channel_points_per_vote: data.channelPointsPerVote
-    };
-    const config: HttpRequestConfig = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Client-Id': this.clientId,
-        'Content-Type': 'application/json'
-      }
-    };
-
-    this.logger.debug('Starting poll on Twitch channel');
-    try {
-      const response = await this.httpClient.post<TwitchPollResponse>(
-        pollUrl,
-        body,
-        config
-      );
-      this.logger.debug('Poll started successfully');
-      return response.data.data[0];
-    } catch (error) {
-      this.logger.error('Failed to start poll', error);
-      throw new Error(`Twitch start poll failed: ${error}`);
     }
   }
 }

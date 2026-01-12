@@ -1,4 +1,4 @@
-export class TwitchUserTokenDTO {
+export class TwitchApiUserTokensDTO {
   access_token: string;
   refresh_token: string;
   expires_in: number;

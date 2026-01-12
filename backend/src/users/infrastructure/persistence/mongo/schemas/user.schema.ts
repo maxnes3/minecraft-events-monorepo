@@ -9,7 +9,7 @@ export type UserDocument = User & Document;
 })
 export class User {
   @Prop({ required: true, trim: true })
-  name: string;
+  login: string;
 
   @Prop({ unique: true, sparse: true })
   twitchId?: string;

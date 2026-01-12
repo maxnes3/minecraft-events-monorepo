@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TwitchAnnouncementColor } from '../twitch.enums';
+import { TwitchAnnouncementColor } from './twitch.enums';
 import { IChatAnnouncementDTO } from '@/streaming-platforms/domain/dto/streaming-platform-chat-announcement.interface';
 
 export class TwitchChatAnnouncementDTO implements IChatAnnouncementDTO {

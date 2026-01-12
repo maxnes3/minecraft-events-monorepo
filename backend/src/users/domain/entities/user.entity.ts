@@ -4,27 +4,27 @@ import { UserDTO } from '@/users/application/dto/user.dto';
 export class UserEntity {
   constructor(
     private readonly _id: string,
-    private name: string,
+    private login: string,
     private twitchId?: string,
     private createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
   ) {}
 
-  public static create(name: string, twitchId?: string): UserEntity {
+  public static create(login: string, twitchId?: string): UserEntity {
     const id = new Types.ObjectId().toString();
-    return new UserEntity(id, name, twitchId);
+    return new UserEntity(id, login, twitchId);
   }
 
   public static restore(
     id: string,
-    name: string,
+    login: string,
     twitchId?: string,
     createdAt?: Date,
     updatedAt?: Date
   ): UserEntity {
     return new UserEntity(
       id,
-      name,
+      login,
       twitchId,
       createdAt || new Date(),
       updatedAt || new Date()
@@ -34,11 +34,16 @@ export class UserEntity {
   public toDTO(): UserDTO {
     return {
       _id: this._id,
-      name: this.name,
+      login: this.login,
       twitchId: this.twitchId,
       createdAt: this.createdAt.toDateString(),
       updatedAt: this.updatedAt.toDateString()
     };
+  }
+
+  public setLogin(login: string): void {
+    this.login = login;
+    this.updatedAt = new Date();
   }
 
   public connectTwitch(twitchId: string): void {
@@ -50,8 +55,8 @@ export class UserEntity {
     return this._id;
   }
 
-  public getName(): string {
-    return this.name;
+  public getLogin(): string {
+    return this.login;
   }
 
   public getTwitchId(): string | undefined {

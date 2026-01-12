@@ -5,7 +5,7 @@ export class UserDTO {
   _id: string;
 
   @ApiProperty({ description: '', type: String, required: true })
-  name: string;
+  login: string;
 
   @ApiProperty({ description: '', type: String, required: false })
   twitchId?: string;

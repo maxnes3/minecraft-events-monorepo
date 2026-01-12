@@ -1,5 +1,7 @@
 version: "3.8"
 
+name: streaming-events
+
 services:
   backend:
     build:
@@ -12,6 +14,8 @@ services:
       - path: ./.env.common
         required: true
       - path: ./.env.development
+        required: true
+      - path: ./.env.database
         required: true
     volumes:
       - /app/node_modules

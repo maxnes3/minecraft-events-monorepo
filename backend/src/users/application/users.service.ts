@@ -1,9 +1,10 @@
 import { LoggerService } from '@/shared/logger';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { UserDTO } from './dto/user.dto';
 import { UsersRepository } from '../infrastructure/persistence/mongo/repositories/users.repository';
 import { UserEntity } from '../domain/entities/user.entity';
+import { UserUpdateDTO } from './dto/user-update.dto';
 
 @Injectable()
 export class UsersService {
@@ -26,7 +27,7 @@ export class UsersService {
   }
 
   public async createUser(data: UserCreateDTO): Promise<UserDTO | null> {
-    this.logger.debug(`Creating user with name: ${data.name}`);
+    this.logger.debug(`Creating user with login: ${data.login}`);
     if (data.twitchId) {
       const exists = await this.usersRepository.existsByTwitchId(data.twitchId);
       if (exists) {
@@ -37,10 +38,29 @@ export class UsersService {
       }
     }
 
-    const user = UserEntity.create(data.name, data.twitchId);
+    const user = UserEntity.create(data.login, data.twitchId);
     await this.usersRepository.save(user);
 
     this.logger.debug(`User created with ID: ${user.getId()}`);
+    return user.toDTO();
+  }
+
+  public async updateUser(
+    userId: string,
+    data: UserUpdateDTO
+  ): Promise<UserDTO | null> {
+    this.logger.debug(`Updating user by ID ${userId}`);
+
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.logger.error(`User with ID ${userId} not found`);
+      return null;
+    }
+
+    user.setLogin(data.login ?? user.getLogin());
+    await this.usersRepository.save(user);
+
+    this.logger.debug(`User updated with ID: ${user.getId()}`);
     return user.toDTO();
   }
 
@@ -52,7 +72,8 @@ export class UsersService {
 
     const user = await this.usersRepository.findById(userId);
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      this.logger.error(`User with ID ${userId} not found`);
+      return null;
     }
 
     const exists = await this.usersRepository.existsByTwitchId(twitchId);
@@ -70,17 +91,17 @@ export class UsersService {
     return user.toDTO();
   }
 
-  public async deleteUser(id: string): Promise<boolean> {
-    this.logger.debug(`Deleting user with ID: ${id}`);
+  public async deleteUserById(userId: string): Promise<boolean> {
+    this.logger.debug(`Deleting user with ID: ${userId}`);
 
-    const user = await this.usersRepository.findById(id);
+    const user = await this.usersRepository.findById(userId);
     if (!user) {
-      this.logger.error(`User with ID ${id} not found`);
+      this.logger.error(`User with ID ${userId} not found`);
       return false;
     }
 
-    await this.usersRepository.delete(id);
-    this.logger.debug(`User deleted with ID: ${id}`);
+    await this.usersRepository.delete(userId);
+    this.logger.debug(`User deleted with ID: ${userId}`);
     return true;
   }
 }

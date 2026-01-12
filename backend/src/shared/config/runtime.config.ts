@@ -20,7 +20,7 @@ export const publicRuntimeConfig = {
     broadcasterIdName: process.env.NESTJS_TWITCH_BROADCASTER_ID_NAME || ''
   },
   clients: {
-    frontendUrl: process.env.NESTJS_FRONTEND_URL || ''
+    allowedUrls: process.env.NESTJS_CLIENTS_ALLOWED_URLS?.split(',') || []
   },
   i18n: {
     fallbackLanguage: process.env.NESTJS_I18N_FALLBACK_LANGUAGE || 'en',

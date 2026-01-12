@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoggerService } from '@/shared/logger';
 import { publicRuntimeConfig } from '@/shared/config';
-import { TwitchChatAnnouncementDTO } from '../../infrastructure/twitch/dto/request/twitch-chat-announcment.request';
+import { TwitchChatAnnouncementDTO } from '../../infrastructure/twitch/dto/twitch-chat-announcment.request';
 import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
 
 @ApiTags('Twitch Chat')

@@ -1,7 +1,8 @@
 import { ConsoleLogger, Injectable, Scope } from '@nestjs/common';
+import { ILoggerService } from '../domain/logger-service.interface';
 
 @Injectable({ scope: Scope.TRANSIENT })
-export class LoggerService extends ConsoleLogger {
+export class LoggerService extends ConsoleLogger implements ILoggerService {
   public log(message: string, context?: string): void {
     super.log(message, context || this.context);
   }

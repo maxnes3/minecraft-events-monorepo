@@ -14,6 +14,7 @@ import { EventDTO } from './dto/event.dto';
 import { EventCreateDTO } from './dto/event-create.dto';
 import { EventsRepository } from '../infrastructure/persistence/mongo/repositories/events.repository';
 import { EventEntity } from '../domain/entities/event.entity';
+import { EventUpdateDTO } from './dto/event-update.dto';
 
 @Injectable()
 export class EventsService {
@@ -69,6 +70,23 @@ export class EventsService {
     return event.toDTO();
   }
 
+  public async updateEventById(
+    eventId: string,
+    data: EventUpdateDTO
+  ): Promise<EventDTO | null> {
+    const event = await this.eventsRepository.findById(eventId);
+    if (!event) {
+      this.logger.error(`Event with ID ${eventId} not found`);
+      return null;
+    }
+
+    event.setName(data.name ?? event.getName());
+    event.setDuration(data.duration ?? event.getDuration());
+
+    await this.eventsRepository.update(event);
+    return event.toDTO();
+  }
+
   public async startEvent(
     eventId: string,
     authData: IStreamingPlatformAuthDTO
@@ -109,6 +127,20 @@ export class EventsService {
       this.logger.error(`Failed to send chat announcement ${error}`);
       return false;
     }
+  }
+
+  public async deleteEventById(eventId: string): Promise<boolean> {
+    this.logger.debug(`Deleting event with ID: ${eventId}`);
+
+    const event = await this.eventsRepository.findById(eventId);
+    if (!event) {
+      this.logger.error(`Event with ID ${eventId} not found`);
+      return false;
+    }
+
+    await this.eventsRepository.delete(eventId);
+    this.logger.debug(`Event deleted with ID: ${eventId}`);
+    return true;
   }
 
   private getEventAnnouncementMessage(
