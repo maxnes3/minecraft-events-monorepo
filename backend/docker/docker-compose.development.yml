@@ -1,10 +1,11 @@
 version: "3.8"
 
 services:
-  minecraft-events-backend:
+  backend:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    container_name: streaming-events-backend
     ports:
       - "3000:3000"
     env_file:

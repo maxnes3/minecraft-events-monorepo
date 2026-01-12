@@ -1,7 +1,7 @@
 import { TwitchBroadcasterType } from '../twitch.enums';
 
 export class TwitchUserResponse {
-  data: [TwitchUserDTO];
+  data: TwitchUserDTO[];
 }
 
 export class TwitchUserDTO {

@@ -1,5 +1,5 @@
 import { StreamingPlatforms } from '@/streaming-platforms';
-import { EventStatus } from '../events.enums';
+import { EventStatus } from './events.enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { publicRuntimeConfig } from '@/shared/config';
 

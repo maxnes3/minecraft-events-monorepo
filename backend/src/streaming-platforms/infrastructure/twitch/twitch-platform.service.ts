@@ -2,13 +2,15 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { LoggerService } from '@/shared/logger';
 import { HttpClient, HttpRequestConfig } from '@/shared/http';
 import { publicRuntimeConfig } from '@/shared/config';
-import { TwitchAppTokenResponse } from './dto/response/twitch-app-token.response';
-import { TwitchUserTokenResponse } from './dto/response/twitch-user-token.response';
-import { TwitchUserResponse } from './dto/response/twitch-user.response';
+import { TwitchUserTokenDTO } from './dto/response/twitch-user-token.dto';
+import {
+  TwitchUserDTO,
+  TwitchUserResponse
+} from './dto/response/twitch-user.dto';
 import { TwitchChatAnnouncementDTO } from './dto/request/twitch-chat-announcment.request';
 import { TwitchStartPollRequest } from './dto/request/twitch-start-poll.request';
 import {
-  TwitchPollData,
+  TwitchPollDTO,
   TwitchPollResponse
 } from './dto/response/twitch-poll.response';
 import { TwitchBroadcasterType } from './dto/twitch.enums';
@@ -36,34 +38,6 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     this.logger.setContext(TwitchPlatformService.name);
   }
 
-  public async getAppToken(): Promise<TwitchAppTokenResponse> {
-    const tokenUrl = `${this.idUrl}/oauth2/token`;
-    const params = new URLSearchParams({
-      client_id: this.clientId,
-      client_secret: this.clientSecret,
-      grant_type: 'client_credentials'
-    });
-    const config: HttpRequestConfig = {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    };
-
-    this.logger.debug('Requesting new app access token via client credentials');
-    try {
-      const response = await this.httpClient.post<TwitchAppTokenResponse>(
-        tokenUrl,
-        params.toString(),
-        config
-      );
-      this.logger.debug(`Auth data: ${JSON.stringify(response.data)}`);
-      return response.data;
-    } catch (error) {
-      this.logger.error('Failed to obtain app token', error);
-      throw new Error(`Twitch app authentication failed: ${error}`);
-    }
-  }
-
   public getAuthUrl(): string {
     const authUrl = new URL(`${this.idUrl}/oauth2/authorize`);
     const params = new URLSearchParams({
@@ -78,9 +52,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     return authUrl.toString();
   }
 
-  public async exchangeCodeToToken(
-    code: string
-  ): Promise<TwitchUserTokenResponse> {
+  public async exchangeCodeToToken(code: string): Promise<TwitchUserTokenDTO> {
     const tokenUrl = `${this.idUrl}/oauth2/token`;
     const params = new URLSearchParams({
       client_id: this.clientId,
@@ -97,7 +69,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
     this.logger.debug('Exchanging authorization code for user token');
     try {
-      const response = await this.httpClient.post<TwitchUserTokenResponse>(
+      const response = await this.httpClient.post<TwitchUserTokenDTO>(
         tokenUrl,
         params.toString(),
         config
@@ -112,7 +84,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
   public async refreshUserToken(
     refreshToken: string
-  ): Promise<TwitchUserTokenResponse> {
+  ): Promise<TwitchUserTokenDTO> {
     const tokenUrl = `${this.idUrl}/oauth2/token`;
     const params = new URLSearchParams({
       client_id: this.clientId,
@@ -128,7 +100,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
     this.logger.debug('Refreshing Twitch user token');
     try {
-      const response = await this.httpClient.post<TwitchUserTokenResponse>(
+      const response = await this.httpClient.post<TwitchUserTokenDTO>(
         tokenUrl,
         params.toString(),
         config
@@ -143,7 +115,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     }
   }
 
-  public async getUser(authData: TwitchAuthDTO): Promise<TwitchUserResponse> {
+  public async getUser(authData: TwitchAuthDTO): Promise<TwitchUserDTO> {
     const userUrl = `${this.apiUrl}/helix/users`;
     const config: HttpRequestConfig = {
       headers: {
@@ -159,7 +131,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
         config
       );
       this.logger.debug(`User data: ${JSON.stringify(response.data)}`);
-      return response.data;
+      return response.data.data[0];
     } catch (error) {
       this.logger.error('Failed to get user data', error);
       throw new Error(`Twitch get user failed: ${error}`);
@@ -169,9 +141,9 @@ export class TwitchPlatformService implements IStreamingPlatformService {
   public async sendChatAnnouncement(
     data: TwitchChatAnnouncementDTO,
     authData: TwitchAuthDTO
-  ): Promise<void> {
+  ): Promise<boolean> {
     if (!authData.broadcasterId) {
-      return;
+      return false;
     }
 
     const chatAnnouncementUrl = `${this.apiUrl}/helix/chat/announcements`;
@@ -196,6 +168,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     try {
       await this.httpClient.post<void>(chatAnnouncementUrl, body, config);
       this.logger.debug('Chat announcement sent successfully');
+      return true;
     } catch (error) {
       this.logger.error('Failed to send chat announcement', error);
       throw new Error(`Twitch send chat announcement failed: ${error}`);
@@ -206,7 +179,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     accessToken: string,
     broadcasterId: string,
     pollId: string
-  ): Promise<TwitchPollData> {
+  ): Promise<TwitchPollDTO> {
     const pollUrl = `${this.apiUrl}/helix/polls`;
     const params = {
       broadcaster_id: broadcasterId,
@@ -237,7 +210,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
   public async startPoll(
     accessToken: string,
     data: TwitchStartPollRequest
-  ): Promise<TwitchPollData> {
+  ): Promise<TwitchPollDTO> {
     if (data.broadcasterType === TwitchBroadcasterType.NONE) {
       this.logger.error(
         'Broadcaster is not affiliate or partner, cannot start poll'

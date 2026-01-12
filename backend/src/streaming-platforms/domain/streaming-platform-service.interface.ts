@@ -1,10 +1,10 @@
-import { IAuthDTO } from './dto/auth.interface';
-import { IChatAnnouncementDTO } from './dto/chat-announcement.interface';
+import { IStreamingPlatformAuthDTO } from './dto/streaming-platform-auth.interface';
+import { IChatAnnouncementDTO } from './dto/streaming-platform-chat-announcement.interface';
 
 export interface IStreamingPlatformService {
-  getUser(authData: IAuthDTO);
+  getUser(authData: IStreamingPlatformAuthDTO): Promise<any>;
   sendChatAnnouncement(
     data: IChatAnnouncementDTO,
-    authData: IAuthDTO
-  ): Promise<void>;
+    authData: IStreamingPlatformAuthDTO
+  ): Promise<boolean>;
 }

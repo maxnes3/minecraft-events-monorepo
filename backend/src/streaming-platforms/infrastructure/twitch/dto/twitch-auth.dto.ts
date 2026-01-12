@@ -1,6 +1,6 @@
-import { IAuthDTO } from '@/streaming-platforms/domain/dto/auth.interface';
+import { IStreamingPlatformAuthDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth.interface';
 
-export class TwitchAuthDTO implements IAuthDTO {
+export class TwitchAuthDTO implements IStreamingPlatformAuthDTO {
   accessToken: string;
   broadcasterId?: string;
 }

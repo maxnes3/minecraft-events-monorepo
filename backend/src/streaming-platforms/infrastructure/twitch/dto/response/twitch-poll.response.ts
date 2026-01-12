@@ -1,8 +1,8 @@
 export class TwitchPollResponse {
-  data: [TwitchPollData];
+  data: TwitchPollDTO[];
 }
 
-export class TwitchPollData {
+export class TwitchPollDTO {
   id: string;
   broadcaster_id: string;
   broadcaster_name: string;

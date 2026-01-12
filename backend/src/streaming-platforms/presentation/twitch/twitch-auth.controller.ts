@@ -4,6 +4,7 @@ import { LoggerService } from '@/shared/logger';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { publicRuntimeConfig } from '@/shared/config';
 import type { Response } from 'express';
+import { formatedHttpResponse } from '@/shared/http';
 
 @ApiTags('Twitch Auth')
 @Controller('twitch/auth')
@@ -13,20 +14,6 @@ export class TwitchAuthController {
     private readonly logger: LoggerService
   ) {
     this.logger.setContext(TwitchAuthController.name);
-  }
-
-  @ApiOperation({ summary: 'Authenticate the app with Twitch' })
-  @Post('app')
-  @HttpCode(200)
-  public async getAppToken() {
-    this.logger.debug('Requesting app access token');
-    const token = await this.twitchService.getAppToken();
-
-    return {
-      success: true,
-      expires_in: token.expires_in,
-      token_type: token.token_type
-    };
   }
 
   @ApiOperation({ summary: 'Redirect to Twitch authorization URL' })
@@ -94,7 +81,6 @@ export class TwitchAuthController {
     @Query(publicRuntimeConfig.twitch.refreshTokenName) refreshToken: string
   ) {
     const tokens = await this.twitchService.refreshUserToken(refreshToken);
-    this.logger.debug('Twitch user tokens refreshed successfully');
-    return tokens;
+    return formatedHttpResponse({ success: true, data: tokens });
   }
 }

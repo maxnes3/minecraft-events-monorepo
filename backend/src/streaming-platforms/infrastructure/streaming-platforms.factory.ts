@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { StreamingPlatforms } from '../domain/streaming-platforms.enums';
+import { StreamingPlatforms } from './streaming-platforms.enums';
 import { IStreamingPlatformService } from '../domain/streaming-platform-service.interface';
 import { TwitchPlatformService } from './twitch/twitch-platform.service';
 

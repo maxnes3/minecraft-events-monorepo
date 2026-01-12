@@ -4,5 +4,5 @@
     "link": "🚀 The event '{eventName}' has started! Join us now at {eventLink} and cast your vote!",
     "command": "🚀 The event '{eventName}' has started! Use the command {voteCommand} to cast your vote!"
   },
-  "completed": "🏆 The winner is {winnerName}!, with a vote count of {voteCount}."
+  "completed": "🏆 The winner is '{winnerName}'!, with a vote count of {voteCount}."
 }

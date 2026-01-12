@@ -1,7 +1,7 @@
-# Minecraft Events — Backend
+# Streaming Events — Backend
 
 Brief description
-- Backend for the Minecraft Events project: API and integrations (Twitch, etc.).
+- Backend for the Streaming Events project: API and integrations (Twitch, etc.).
 - Built with Node.js + NestJS, package manager — pnpm.
 
 Requirements
@@ -42,7 +42,7 @@ docker compose -f docker-compose.local.yml up --build
 Build the image manually
 ```bash
 cd backend
-docker build -f docker/Dockerfile -t minecraft-events-backend .
+docker build -f docker/Dockerfile -t streaming-events-backend .
 ```
 
 Notes

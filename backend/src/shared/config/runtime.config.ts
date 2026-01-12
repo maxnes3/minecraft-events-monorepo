@@ -27,5 +27,8 @@ export const publicRuntimeConfig = {
     supportedLanguages: process.env.NESTJS_I18N_SUPPORTED_LANGUAGES?.split(
       ','
     ) || ['en']
+  },
+  mongodb: {
+    uri: process.env.NESTJS_MONGODB_URI || ''
   }
 };
