@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerModule } from './shared/logger';
 import { HttpModule } from './shared/http';
@@ -6,7 +7,9 @@ import { I18nModule } from './shared/i18n';
 import { StreamingPlatformsModule } from './streaming-platforms';
 import { EventsModule } from './events';
 import { UsersModule } from './users';
+import { WebSocketModule } from './websocket';
 import { publicRuntimeConfig } from './shared/config';
+import { AuthGuard, AuthModule } from './auth';
 
 @Module({
   imports: [
@@ -22,7 +25,15 @@ import { publicRuntimeConfig } from './shared/config';
     I18nModule,
     StreamingPlatformsModule,
     EventsModule,
-    UsersModule
+    UsersModule,
+    AuthModule,
+    WebSocketModule
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard
+    }
   ]
 })
 export class AppModule {}

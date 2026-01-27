@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { EventEntity } from '@/events/domain/entities/event.entity';
 import { EventMapper } from '../../mappers/event.mapper';
+import { EventStatus } from '@/events/domain/entities/events.enums';
 
 export class EventsRepository implements IEventsRepository {
   constructor(
@@ -37,5 +38,23 @@ export class EventsRepository implements IEventsRepository {
 
   public async delete(id: string): Promise<void> {
     await this.eventModel.findByIdAndDelete(id).exec();
+  }
+
+  public async existsById(id: string): Promise<boolean> {
+    const count = await this.eventModel.countDocuments({ id }).exec();
+    return count > 0;
+  }
+
+  public async changeEventStatus(
+    id: string,
+    status: EventStatus
+  ): Promise<void> {
+    await this.eventModel
+      .findByIdAndUpdate(
+        id,
+        { $set: { status, updatedAt: new Date() } },
+        { new: true }
+      )
+      .exec();
   }
 }

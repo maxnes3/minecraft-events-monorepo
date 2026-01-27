@@ -12,6 +12,7 @@ export class EventMapper {
       document.owner,
       document.name,
       document.duration,
+      document.status,
       document.createdAt,
       document.updatedAt
     );

@@ -12,7 +12,17 @@ async function bootstrap() {
     .setTitle(publicRuntimeConfig.swagger.title)
     .setDescription(publicRuntimeConfig.swagger.description)
     .setVersion(publicRuntimeConfig.application.version)
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: publicRuntimeConfig.jwt.authorizationHeader,
+        description: 'Enter JWT token',
+        in: 'header'
+      },
+      publicRuntimeConfig.jwt.authorizationHeader
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -21,7 +31,11 @@ async function bootstrap() {
     app,
     document,
     {
-      swaggerOptions: { docExpansion: 'list', showRequestDuration: true }
+      swaggerOptions: {
+        docExpansion: 'list',
+        showRequestDuration: true,
+        persistAuthorization: true
+      }
     }
   );
 

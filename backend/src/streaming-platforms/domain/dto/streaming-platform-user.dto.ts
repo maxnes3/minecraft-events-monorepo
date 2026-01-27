@@ -1,5 +1,6 @@
-export interface IStreamingPlaftormUserDTO {
-  login: string;
-  platformId?: string | undefined;
+export interface StreamingPlaftormUserDTO {
+  platformName: string;
+  platformId: string;
+  platformLogin: string;
   platformProfileImgUrl?: string | undefined;
 }

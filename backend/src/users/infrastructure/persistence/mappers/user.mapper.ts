@@ -9,8 +9,7 @@ export class UserMapper {
 
     return UserEntity.restore(
       document._id.toString(),
-      document.login,
-      document.twitchId,
+      document.platforms,
       document.createdAt,
       document.updatedAt
     );
@@ -19,8 +18,7 @@ export class UserMapper {
   public toPersistence(user: UserEntity): Record<string, any> {
     return {
       _id: user.getId(),
-      login: user.getLogin(),
-      twitchId: user.getTwitchId(),
+      platforms: user.getPlatforms(),
       createdAt: user.getCreatedAt(),
       updatedAt: user.getUpdatedAt()
     };

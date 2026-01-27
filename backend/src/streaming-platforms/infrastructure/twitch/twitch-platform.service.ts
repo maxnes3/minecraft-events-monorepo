@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { AuthService } from '@/auth';
+import { UsersService } from '@/users';
 import { LoggerService } from '@/shared/logger';
 import { HttpClient, HttpRequestConfig } from '@/shared/http';
 import { publicRuntimeConfig } from '@/shared/config';
 import { TwitchApiUserTokensDTO } from './dto/twitch-api-user-token.dto';
 import { TwitchApiUserResponse } from './dto/twitch-api-user.dto';
 import { TwitchChatAnnouncementDTO } from './dto/twitch-chat-announcment.request';
-import { TwitchAuthDTO } from './dto/twitch-auth.dto';
-import { IStreamingPlatformService } from '../../domain/streaming-platform-service.interface';
-import { TwitchTokensDTO } from './dto/twitch-tokens.dto';
+import { IStreamingPlatformService } from '../../domain/interfaces/streaming-platform-service.interface';
 import { TwitchMapper } from './mappers/twitch.mappers';
-import { TwitchUserDTO } from './dto/twitch-user.dto';
+import { StreamingPlatformTokensDTO } from '@/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { StreamingPlatformAuthDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth.dto';
+import { StreamingPlatformAuthRequestDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
 
 @Injectable()
 export class TwitchPlatformService implements IStreamingPlatformService {
@@ -21,6 +24,8 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
   constructor(
     private readonly twitchMapper: TwitchMapper,
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
     private readonly httpClient: HttpClient,
     private readonly logger: LoggerService
   ) {
@@ -49,7 +54,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
   public async exchangeCodeToToken(
     code: string
-  ): Promise<TwitchApiUserTokensDTO> {
+  ): Promise<StreamingPlatformTokensDTO> {
     const tokenUrl = `${this.idUrl}/oauth2/token`;
     const params = new URLSearchParams({
       client_id: this.clientId,
@@ -72,16 +77,70 @@ export class TwitchPlatformService implements IStreamingPlatformService {
         config
       );
       this.logger.debug(`User token data: ${JSON.stringify(response.data)}`);
-      return response.data;
+      return this.twitchMapper.toStreamingPlatformTokensDTO(response.data);
     } catch (error) {
       this.logger.error('Failed to exchange code for token', error);
       throw new Error(`Twitch user authentication failed: ${error}`);
     }
   }
 
+  public isTokenExpired(tokens: StreamingPlatformTokensDTO): boolean {
+    if (tokens.expiresIn === 0) {
+      this.logger.debug('Token has expiresIn = 0, considered never-expiring');
+      return false;
+    }
+
+    if (!tokens.accessToken || tokens.accessToken.trim().length === 0) {
+      this.logger.warn('Token has empty accessToken, considering expired');
+      return true;
+    }
+
+    if (!tokens.obtainedAt) {
+      this.logger.warn('Token missing obtainedAt, assuming expired');
+      return true;
+    }
+
+    try {
+      const obtainedAt = new Date(tokens.obtainedAt);
+
+      if (isNaN(obtainedAt.getTime())) {
+        this.logger.warn('Token has invalid obtainedAt date, assuming expired');
+        return true;
+      }
+
+      const expirationTime = obtainedAt.getTime() + tokens.expiresIn * 1000;
+      const currentTime = Date.now();
+
+      const bufferMs = 30 * 1000;
+      const isExpired = currentTime >= expirationTime - bufferMs;
+
+      if (isExpired) {
+        this.logger.debug(
+          `Token expired. Obtained: ${obtainedAt.toISOString()}, ` +
+            `Duration: ${tokens.expiresIn}s, ` +
+            `Current: ${new Date().toISOString()}`
+        );
+      } else {
+        const timeLeftSeconds = Math.round(
+          (expirationTime - currentTime) / 1000
+        );
+        const timeLeftMinutes = Math.round((timeLeftSeconds / 60) * 10) / 10;
+
+        this.logger.debug(
+          `Token valid for ${timeLeftSeconds}s (${timeLeftMinutes} min)`
+        );
+      }
+
+      return isExpired;
+    } catch (error) {
+      this.logger.error(`Error checking token expiration: ${error}`);
+      return true;
+    }
+  }
+
   public async refreshUserToken(
     refreshToken: string
-  ): Promise<TwitchTokensDTO> {
+  ): Promise<StreamingPlatformTokensDTO> {
     const tokenUrl = `${this.idUrl}/oauth2/token`;
     const params = new URLSearchParams({
       client_id: this.clientId,
@@ -112,7 +171,9 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     }
   }
 
-  public async getUser(authData: TwitchAuthDTO): Promise<TwitchUserDTO> {
+  public async getUser(
+    authData: StreamingPlatformAuthRequestDTO
+  ): Promise<StreamingPlaftormUserDTO> {
     const userUrl = `${this.apiUrl}/helix/users`;
     const config: HttpRequestConfig = {
       headers: {
@@ -137,18 +198,45 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     }
   }
 
+  public async authUserByPlatform(
+    tokens: StreamingPlatformTokensDTO,
+    data: StreamingPlaftormUserDTO
+  ): Promise<StreamingPlatformAuthDTO | null> {
+    const user = await this.usersService.upsertUserByPlatformAuth({
+      name: data.platformName,
+      id: data.platformId,
+      login: data.platformLogin,
+      profileImgUrl: data.platformProfileImgUrl,
+      auth: tokens
+    });
+    if (!user) {
+      this.logger.error('Failed to authenticate user with Twitch platform');
+      return null;
+    }
+    this.logger.debug(`Authenticated user: ${JSON.stringify(user)}`);
+
+    const userTokens = await this.authService.createToken(user._id);
+    this.logger.debug(`User tokens: ${JSON.stringify(userTokens)}`);
+    return {
+      platformName: data.platformName,
+      login: data.platformLogin,
+      profileImgUrl: data.platformProfileImgUrl,
+      auth: userTokens
+    };
+  }
+
   public async sendChatAnnouncement(
     data: TwitchChatAnnouncementDTO,
-    authData: TwitchAuthDTO
+    authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
-    if (!authData.broadcasterId) {
+    if (!authData.platformId) {
       return false;
     }
 
     const chatAnnouncementUrl = `${this.apiUrl}/helix/chat/announcements`;
     const params = {
-      broadcaster_id: authData.broadcasterId,
-      moderator_id: authData.broadcasterId
+      broadcaster_id: authData.platformId,
+      moderator_id: authData.platformId
     };
     const body = {
       message: data.message,

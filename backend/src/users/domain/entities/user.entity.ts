@@ -1,31 +1,42 @@
 import { Types } from 'mongoose';
 import { UserDTO } from '@/users/application/dto/user.dto';
 
+export class UserPlatformAuthData {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+export class UserPlatformData {
+  name: string;
+  id: string;
+  login?: string;
+  profileImgUrl?: string | undefined;
+  auth: UserPlatformAuthData;
+}
+
 export class UserEntity {
   constructor(
     private readonly _id: string,
-    private login: string,
-    private twitchId?: string,
+    private platforms: UserPlatformData[],
     private createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
   ) {}
 
-  public static create(login: string, twitchId?: string): UserEntity {
+  public static create(platformsData: UserPlatformData[]): UserEntity {
     const id = new Types.ObjectId().toString();
-    return new UserEntity(id, login, twitchId);
+    return new UserEntity(id, platformsData);
   }
 
   public static restore(
     id: string,
-    login: string,
-    twitchId?: string,
+    platformsData: UserPlatformData[],
     createdAt?: Date,
     updatedAt?: Date
   ): UserEntity {
     return new UserEntity(
       id,
-      login,
-      twitchId,
+      platformsData,
       createdAt || new Date(),
       updatedAt || new Date()
     );
@@ -34,20 +45,18 @@ export class UserEntity {
   public toDTO(): UserDTO {
     return {
       _id: this._id,
-      login: this.login,
-      twitchId: this.twitchId,
+      platforms: this.platforms,
       createdAt: this.createdAt.toDateString(),
       updatedAt: this.updatedAt.toDateString()
     };
   }
 
-  public setLogin(login: string): void {
-    this.login = login;
-    this.updatedAt = new Date();
-  }
-
-  public connectTwitch(twitchId: string): void {
-    this.twitchId = twitchId;
+  public addPlatform(data: UserPlatformData): void {
+    const exists = this.platforms.find((p) => p.name === data.name);
+    if (exists) {
+      return;
+    }
+    this.platforms.push(data);
     this.updatedAt = new Date();
   }
 
@@ -55,12 +64,12 @@ export class UserEntity {
     return this._id;
   }
 
-  public getLogin(): string {
-    return this.login;
+  public getPlatforms(): UserPlatformData[] {
+    return [...this.platforms];
   }
 
-  public getTwitchId(): string | undefined {
-    return this.twitchId;
+  public getPlatformByName(platformName: string): UserPlatformData | undefined {
+    return this.platforms.find((p) => p.name === platformName);
   }
 
   public getCreatedAt(): Date {

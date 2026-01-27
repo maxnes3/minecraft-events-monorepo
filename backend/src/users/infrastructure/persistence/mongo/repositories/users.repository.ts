@@ -1,7 +1,11 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IUsersRepository } from '@/users/domain/repositories/users-repository.interface';
-import { UserEntity } from '@/users/domain/entities/user.entity';
+import {
+  UserEntity,
+  UserPlatformAuthData,
+  UserPlatformData
+} from '@/users/domain/entities/user.entity';
 import { User, UserDocument } from '../schemas/user.schema';
 import { UserMapper } from '../../mappers/user.mapper';
 
@@ -16,8 +20,20 @@ export class UsersRepository implements IUsersRepository {
     return this.mapper.toDomain(document);
   }
 
-  public async findByTwitchId(twitchId: string): Promise<UserEntity | null> {
-    const document = await this.userModel.findOne({ twitchId }).exec();
+  public async findByPlatformNameAndId(
+    platformName: string,
+    platformId: string
+  ): Promise<UserEntity | null> {
+    const document = await this.userModel
+      .findOne({
+        platforms: {
+          $elemMatch: {
+            name: platformName,
+            id: platformId
+          }
+        }
+      })
+      .exec();
     return this.mapper.toDomain(document);
   }
 
@@ -37,8 +53,82 @@ export class UsersRepository implements IUsersRepository {
     await this.userModel.findByIdAndDelete(id).exec();
   }
 
-  public async existsByTwitchId(twitchId: string): Promise<boolean> {
-    const count = await this.userModel.countDocuments({ twitchId }).exec();
+  public async existsById(id: string): Promise<boolean> {
+    const count = await this.userModel.countDocuments({ id }).exec();
     return count > 0;
+  }
+
+  public async existsByPlatformNameAndId(
+    platformName: string,
+    platformId: string
+  ): Promise<boolean> {
+    const count = await this.userModel
+      .countDocuments({
+        platforms: {
+          $elemMatch: {
+            name: platformName,
+            id: platformId
+          }
+        }
+      })
+      .exec();
+    return count > 0;
+  }
+
+  public async connectPlatformToUser(
+    userId: string,
+    platformData: UserPlatformData
+  ): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $push: { platforms: platformData },
+          $set: { updatedAt: new Date() }
+        },
+        { new: true }
+      )
+      .exec();
+  }
+
+  public async removePlatformFromUser(
+    userId: string,
+    platformName: string
+  ): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $pull: { platforms: { name: platformName } },
+          $set: { updatedAt: new Date() }
+        },
+        { new: true }
+      )
+      .exec();
+  }
+
+  public async updatePlatformAuthDataAtUser(
+    userId: string,
+    platformName: string,
+    authData: UserPlatformAuthData
+  ): Promise<UserEntity | null> {
+    const document = await this.userModel
+      .findOneAndUpdate(
+        {
+          _id: userId,
+          'platforms.name': platformName
+        },
+        {
+          $set: {
+            'platforms.$.auth': authData,
+            updatedAt: new Date()
+          }
+        },
+        {
+          new: true
+        }
+      )
+      .exec();
+    return this.mapper.toDomain(document);
   }
 }

@@ -4,20 +4,16 @@ export const publicRuntimeConfig = {
     port: process.env.NESTJS_APPLICATION_PORT || 3000,
     apiPrefix: process.env.NESTJS_APPLICATION_API_PREFIX || 'api/v1'
   },
+  jwt: {
+    secret: process.env.NESTJS_JWT_SECRET || '',
+    expiresIn: Number(process.env.NESTJS_JWT_EXPIRES_IN) || 3600,
+    refreshSecret: process.env.NESTJS_JWT_REFRESH_SECRET || '',
+    authorizationHeader: process.env.NESTJS_AUTHORIZATION_HEADER || '',
+    refreshTokenHeader: process.env.NESTJS_REFRESH_TOKEN_HEADER || ''
+  },
   swagger: {
     title: process.env.NESTJS_SWAGGER_TITLE || '',
     description: process.env.NESTJS_SWAGGER_DESCRIPTION || ''
-  },
-  twitch: {
-    clientId: process.env.NESTJS_TWITCH_CLIENT_ID || '',
-    clientSecret: process.env.NESTJS_TWITCH_CLIENT_SECRET || '',
-    idUrl: process.env.NESTJS_TWITCH_ID_URL || '',
-    apiUrl: process.env.NESTJS_TWITCH_API_URL || '',
-    redirectUrl: process.env.NESTJS_TWITCH_REDIRECT_URI || '',
-    authScopes: process.env.NESTJS_TWITCH_AUTH_SCOPES?.split(',') || [],
-    accessTokenName: process.env.NESTJS_TWITCH_ACCESS_TOKEN_NAME || '',
-    refreshTokenName: process.env.NESTJS_TWITCH_REFRESH_TOKEN_NAME || '',
-    broadcasterIdName: process.env.NESTJS_TWITCH_BROADCASTER_ID_NAME || ''
   },
   clients: {
     allowedUrls: process.env.NESTJS_CLIENTS_ALLOWED_URLS?.split(',') || []
@@ -30,5 +26,22 @@ export const publicRuntimeConfig = {
   },
   mongodb: {
     uri: process.env.NESTJS_MONGODB_URI || ''
+  },
+  twitch: {
+    clientId: process.env.NESTJS_TWITCH_CLIENT_ID || '',
+    clientSecret: process.env.NESTJS_TWITCH_CLIENT_SECRET || '',
+    idUrl: process.env.NESTJS_TWITCH_ID_URL || '',
+    apiUrl: process.env.NESTJS_TWITCH_API_URL || '',
+    redirectUrl: process.env.NESTJS_TWITCH_REDIRECT_URI || '',
+    authScopes: process.env.NESTJS_TWITCH_AUTH_SCOPES?.split(',') || []
+  },
+  youtube: {
+    clientId: process.env.NESTJS_YOUTUBE_CLIENT_ID || '',
+    clientSecret: process.env.NESTJS_YOUTUBE_CLIENT_SECRET || '',
+    accountsUrl: process.env.NESTJS_YOUTUBE_ACCOUNTS_URL || '',
+    oauth2Url: process.env.NESTJS_YOUTUBE_OAUTH2_URL || '',
+    apiUrl: process.env.NESTJS_YOUTUBE_API_URL || '',
+    redirectUrl: process.env.NESTJS_YOUTUBE_REDIRECT_URI || '',
+    authScopes: process.env.NESTJS_YOUTUBE_AUTH_SCOPES?.split(',') || []
   }
 };

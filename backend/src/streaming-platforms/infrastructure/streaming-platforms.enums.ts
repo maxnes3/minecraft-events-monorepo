@@ -1,3 +1,4 @@
 export enum StreamingPlatforms {
-  TWITCH = 'twitch'
+  TWITCH = 'twitch',
+  YOUTUBE = 'youtube'
 }

@@ -7,12 +7,45 @@ export type UserDocument = User & Document;
   timestamps: true,
   collection: 'users'
 })
-export class User {
-  @Prop({ required: true, trim: true })
-  login: string;
+export class UserPlatformAuthData {
+  @Prop({ required: true })
+  accessToken: string;
 
-  @Prop({ unique: true, sparse: true })
-  twitchId?: string;
+  @Prop({ required: true })
+  refreshToken: string;
+
+  @Prop({ required: true })
+  expiresIn: number;
+}
+
+@Schema({
+  timestamps: true,
+  collection: 'users'
+})
+export class UserPlatformData {
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  id: string;
+
+  @Prop()
+  login?: string;
+
+  @Prop()
+  profileImgUrl?: string;
+
+  @Prop({ type: UserPlatformAuthData, default: {} })
+  auth: UserPlatformAuthData;
+}
+
+@Schema({
+  timestamps: true,
+  collection: 'users'
+})
+export class User {
+  @Prop({ type: [UserPlatformData], default: [] })
+  platforms: UserPlatformData[];
 
   @Prop({ default: Date.now })
   createdAt: Date;
@@ -23,4 +56,9 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.index({ twitchId: 1 }, { unique: true, sparse: true });
+UserSchema.index({ 'platforms.name': 1 });
+UserSchema.index({ 'platforms.id': 1 }, { sparse: true });
+UserSchema.index(
+  { 'platforms.name': 1, 'platforms.id': 1 },
+  { unique: true, sparse: true }
+);

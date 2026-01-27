@@ -1,32 +1,32 @@
 import { Body, Controller, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoggerService } from '@/shared/logger';
-import { publicRuntimeConfig } from '@/shared/config';
 import { TwitchChatAnnouncementDTO } from '../../infrastructure/twitch/dto/twitch-chat-announcment.request';
 import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
+import { formatedHttpResponse } from '@/shared/http';
 
-@ApiTags('Twitch Chat')
-@Controller('twitch/chat')
-export class TwitchChatController {
+@ApiTags('Twitch Stream')
+@Controller('twitch/stream')
+export class TwitchStreamController {
   constructor(
     private readonly twitchService: TwitchPlatformService,
     private readonly logger: LoggerService
   ) {
-    this.logger.setContext(TwitchChatController.name);
+    this.logger.setContext(TwitchStreamController.name);
   }
 
   @ApiOperation({ summary: 'Send a chat announcement to Twitch channel' })
   @Post('send/announcement')
   @HttpCode(200)
   public async sendChatAnnouncement(
-    @Query(publicRuntimeConfig.twitch.accessTokenName) accessToken: string,
-    @Query(publicRuntimeConfig.twitch.broadcasterIdName) broadcasterId: string,
+    @Query('access_token') accessToken: string,
+    @Query('broadcaster_id') broadcasterId: string,
     @Body() data: TwitchChatAnnouncementDTO
   ) {
-    this.logger.debug('Sending chat announcement via TwitchPlatformService');
-    await this.twitchService.sendChatAnnouncement(data, {
+    const success = await this.twitchService.sendChatAnnouncement(data, {
       accessToken,
-      broadcasterId
+      platformId: broadcasterId
     });
+    return formatedHttpResponse({ success });
   }
 }

@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { EventDTO } from '@/events/application/dto/event.dto';
+import { EventStatus } from './events.enums';
 
 export class EventEntity {
   constructor(
@@ -7,6 +8,7 @@ export class EventEntity {
     private readonly owner: string,
     private name: string,
     private duration: number,
+    private status: EventStatus,
     private createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
   ) {}
@@ -14,10 +16,11 @@ export class EventEntity {
   public static create(
     owner: string,
     name: string,
-    duration: number
+    duration: number,
+    status: EventStatus = EventStatus.READY
   ): EventEntity {
     const id = new Types.ObjectId().toString();
-    return new EventEntity(id, owner, name, duration);
+    return new EventEntity(id, owner, name, duration, status);
   }
 
   public static restore(
@@ -25,6 +28,7 @@ export class EventEntity {
     owner: string,
     name: string,
     duration: number,
+    status: EventStatus,
     createdAt?: Date,
     updatedAt?: Date
   ): EventEntity {
@@ -33,6 +37,7 @@ export class EventEntity {
       owner,
       name,
       duration,
+      status,
       createdAt || new Date(),
       updatedAt || new Date()
     );
@@ -44,6 +49,7 @@ export class EventEntity {
       owner: this.owner,
       name: this.name,
       duration: this.duration,
+      status: this.status,
       createdAt: this.createdAt.toDateString(),
       updatedAt: this.updatedAt.toDateString()
     };
@@ -56,6 +62,11 @@ export class EventEntity {
 
   public setDuration(duration: number) {
     this.duration = duration;
+    this.updatedAt = new Date();
+  }
+
+  public setStatus(status: EventStatus) {
+    this.status = status;
     this.updatedAt = new Date();
   }
 
@@ -73,6 +84,10 @@ export class EventEntity {
 
   public getDuration() {
     return this.duration;
+  }
+
+  public getStatus() {
+    return this.status;
   }
 
   public getCreatedAt(): Date {

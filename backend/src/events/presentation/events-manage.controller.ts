@@ -6,20 +6,25 @@ import {
   HttpCode,
   Param,
   Post,
-  Put,
-  Query
+  Put
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { publicRuntimeConfig } from '@/shared/config';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiTags
+} from '@nestjs/swagger';
 import { formatedHttpResponse } from '@/shared/http';
 import { EventsService } from '../application/events.service';
-import { EventAnnouncementDTO } from '../application/dto/event-announcement.dto';
 import { EventCreateDTO } from '../application/dto/event-create.dto';
 import { EventUpdateDTO } from '../application/dto/event-update.dto';
+import { publicRuntimeConfig } from '@/shared/config';
 
-@ApiTags('Events')
+@ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
+@ApiTags('Events Manage')
 @Controller('events')
-export class EventsController {
+export class EventsManageController {
   constructor(private readonly eventsService: EventsService) {}
 
   @ApiOperation({ summary: 'Get event by id' })
@@ -47,6 +52,7 @@ export class EventsController {
   }
 
   @ApiOperation({ summary: 'Create new event' })
+  @ApiBody({ type: EventCreateDTO })
   @Post()
   @HttpCode(200)
   public async createEvent(@Body() data: EventCreateDTO) {
@@ -67,50 +73,6 @@ export class EventsController {
       return formatedHttpResponse({ success: false });
     }
     return formatedHttpResponse({ success: true, data: event });
-  }
-
-  @ApiOperation({ summary: 'Start event' })
-  @ApiParam({ name: 'id', description: 'Event Id', type: String })
-  @Post('/:id/start')
-  @HttpCode(200)
-  public async startEvent(
-    @Query(publicRuntimeConfig.twitch.accessTokenName) accessToken: string,
-    @Query(publicRuntimeConfig.twitch.broadcasterIdName) broadcasterId: string,
-    @Param('id') eventId: string
-  ) {
-    const authData = { accessToken, broadcasterId };
-    const success = await this.eventsService.startEvent(eventId, authData);
-    return formatedHttpResponse({ success });
-  }
-
-  @ApiOperation({ summary: 'Complete event' })
-  @ApiParam({ name: 'id', description: 'Event Id', type: String })
-  @Post('/:id/complete')
-  @HttpCode(200)
-  public async completeEvent(
-    @Query(publicRuntimeConfig.twitch.accessTokenName) accessToken: string,
-    @Query(publicRuntimeConfig.twitch.broadcasterIdName) broadcasterId: string,
-    @Param('id') eventId: string
-  ) {
-    const authData = { accessToken, broadcasterId };
-    const success = await this.eventsService.completeEvent(eventId, authData);
-    return formatedHttpResponse({ success });
-  }
-
-  @ApiOperation({ summary: 'Send event announcement' })
-  @Post('send/announcement')
-  @HttpCode(200)
-  public async sendEventAnnouncement(
-    @Query(publicRuntimeConfig.twitch.accessTokenName) accessToken: string,
-    @Query(publicRuntimeConfig.twitch.broadcasterIdName) broadcasterId: string,
-    @Body() data: EventAnnouncementDTO
-  ) {
-    const authData = { accessToken, broadcasterId };
-    const success = await this.eventsService.sendEventAnnouncement(
-      data,
-      authData
-    );
-    return formatedHttpResponse({ success });
   }
 
   @ApiOperation({ summary: 'Delete event by id' })

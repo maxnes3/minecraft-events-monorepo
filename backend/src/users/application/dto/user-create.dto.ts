@@ -1,9 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { UserPlatformDTO } from './user-platform.dto';
 
 export class UserCreateDTO {
-  @ApiProperty({ description: '', type: String, required: true })
-  login: string;
-
-  @ApiProperty({ description: '', type: String, required: false })
-  twitchId?: string;
+  platformData: UserPlatformDTO;
 }

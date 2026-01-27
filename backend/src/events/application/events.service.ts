@@ -5,16 +5,18 @@ import { publicRuntimeConfig } from '@/shared/config';
 import {
   StreamingPlatforms,
   StreamingPlatformsFactory,
-  type IStreamingPlatformAuthDTO
+  type StreamingPlatformAuthRequestDTO
 } from '@/streaming-platforms';
 import { EventAnnouncementDTO } from './dto/event-announcement.dto';
-import { EventStatus } from './dto/events.enums';
+import { EventStatus } from '../domain/entities/events.enums';
 import { UsersService } from '@/users';
 import { EventDTO } from './dto/event.dto';
 import { EventCreateDTO } from './dto/event-create.dto';
 import { EventsRepository } from '../infrastructure/persistence/mongo/repositories/events.repository';
 import { EventEntity } from '../domain/entities/event.entity';
 import { EventUpdateDTO } from './dto/event-update.dto';
+import { EventStartDTO } from './dto/event-start.dto';
+import { EventCompleteDTO } from './dto/event-complete.dto';
 
 @Injectable()
 export class EventsService {
@@ -89,29 +91,50 @@ export class EventsService {
 
   public async startEvent(
     eventId: string,
-    authData: IStreamingPlatformAuthDTO
+    data: EventStartDTO,
+    authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
-    await this.sendEventAnnouncement(
+    const exists = await this.eventsRepository.existsById(eventId);
+    if (!exists) {
+      this.logger.error(`Event with ID ${eventId} not found`);
+      return false;
+    }
+
+    await this.eventsRepository.changeEventStatus(eventId, EventStatus.STARTED);
+
+    const eventSended = await this.sendEventAnnouncement(
       { status: EventStatus.STARTED, platform: StreamingPlatforms.TWITCH },
       authData
     );
-    return true;
+    return eventSended;
   }
 
   public async completeEvent(
     eventId: string,
-    authData: IStreamingPlatformAuthDTO
+    data: EventCompleteDTO,
+    authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
-    await this.sendEventAnnouncement(
+    const event = await this.eventsRepository.findById(eventId);
+    if (!event) {
+      this.logger.error(`Event with ID ${eventId} not found`);
+      return false;
+    }
+
+    await this.eventsRepository.changeEventStatus(
+      eventId,
+      EventStatus.COMPLETED
+    );
+
+    const isEventSended = await this.sendEventAnnouncement(
       { status: EventStatus.COMPLETED, platform: StreamingPlatforms.TWITCH },
       authData
     );
-    return true;
+    return isEventSended;
   }
 
   public async sendEventAnnouncement(
     data: EventAnnouncementDTO,
-    authData: IStreamingPlatformAuthDTO
+    authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
     try {
       const message = this.getEventAnnouncementMessage(
@@ -119,8 +142,9 @@ export class EventsService {
         {},
         data.lang
       );
+      const platform = data.platform as StreamingPlatforms;
       const response = await this.streamingFactory
-        .getService(data.platform)
+        .getService(platform)
         .sendChatAnnouncement({ message }, authData);
       return response;
     } catch (error) {
@@ -149,8 +173,8 @@ export class EventsService {
     lang: string = publicRuntimeConfig.i18n.fallbackLanguage
   ): string {
     const messageKeys: Record<EventStatus, string> = {
+      [EventStatus.READY]: '',
       [EventStatus.STARTED]: 'announcements.started.command',
-      [EventStatus.ONGOING]: '',
       [EventStatus.COMPLETED]: 'announcements.completed'
     };
     const translateData = { lang, ...args };

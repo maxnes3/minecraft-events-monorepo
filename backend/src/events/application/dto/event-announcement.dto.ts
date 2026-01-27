@@ -1,5 +1,4 @@
-import { StreamingPlatforms } from '@/streaming-platforms';
-import { EventStatus } from './events.enums';
+import { EventStatus } from '../../domain/entities/events.enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { publicRuntimeConfig } from '@/shared/config';
 
@@ -14,11 +13,11 @@ export class EventAnnouncementDTO {
 
   @ApiProperty({
     description: '',
+    type: String,
     required: true,
-    enum: StreamingPlatforms,
-    default: StreamingPlatforms.TWITCH
+    default: 'twitch'
   })
-  platform: StreamingPlatforms;
+  platform: string;
 
   @ApiProperty({
     description: '',

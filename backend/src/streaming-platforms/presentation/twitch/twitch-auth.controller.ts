@@ -1,20 +1,16 @@
 import { Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
 import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
-import { LoggerService } from '@/shared/logger';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { publicRuntimeConfig } from '@/shared/config';
-import type { Response } from 'express';
 import { formatedHttpResponse } from '@/shared/http';
+import { Public } from '@/auth';
+import type { Response } from 'express';
 
 @ApiTags('Twitch Auth')
 @Controller('twitch/auth')
+@Public()
 export class TwitchAuthController {
-  constructor(
-    private readonly twitchService: TwitchPlatformService,
-    private readonly logger: LoggerService
-  ) {
-    this.logger.setContext(TwitchAuthController.name);
-  }
+  constructor(private readonly twitchService: TwitchPlatformService) {}
 
   @ApiOperation({ summary: 'Redirect to Twitch authorization URL' })
   @ApiQuery({
@@ -28,7 +24,6 @@ export class TwitchAuthController {
     @Res() response: Response
   ) {
     const authRedirectUrl = this.twitchService.getAuthUrl(redirectUrl);
-    this.logger.debug(`Redirecting to Twitch auth URL: ${authRedirectUrl}`);
     response.redirect(authRedirectUrl);
   }
 
@@ -60,40 +55,43 @@ export class TwitchAuthController {
     @Query('state') state: string | undefined,
     @Query('error') error: string | undefined,
     @Query('error_description') errorDescription: string | undefined,
-    @Query('redirect_url') redirectUrl: string | undefined,
+    @Query('is_client') isClient: boolean,
     @Res() response: Response
   ) {
     if (error && errorDescription) {
-      this.logger.error(`Twitch OAuth error: ${error} - ${errorDescription}`);
-      response.redirect(
-        `/error?message=${encodeURIComponent(errorDescription)}`
-      );
-      return;
+      if (!isClient) {
+        response.redirect(
+          `/error?message=${encodeURIComponent(errorDescription)}`
+        );
+        return;
+      }
+      return formatedHttpResponse({ success: false, error });
     }
 
     const tokens = await this.twitchService.exchangeCodeToToken(code);
-    this.logger.debug('Twitch OAuth successful, obtained user token');
 
     const userData = await this.twitchService.getUser({
-      accessToken: tokens.access_token
+      accessToken: tokens.accessToken
     });
-    this.logger.debug('Twitch user data get successful');
+    if (!userData) {
+      return formatedHttpResponse({ success: false });
+    }
 
-    if (!redirectUrl) {
-      this.logger.warn('Client URL is not configured');
+    const authData = await this.twitchService.authUserByPlatform(
+      tokens,
+      userData
+    );
+    if (!isClient) {
       response.redirect(`/${publicRuntimeConfig.application.apiPrefix}`);
       return;
     }
-    this.logger.debug('Redirect to Client URL');
-    response.redirect(redirectUrl);
+    return formatedHttpResponse({ success: true, data: authData });
   }
 
   @ApiOperation({ summary: 'Refresh Twitch user tokens' })
   @Post('refresh')
   @HttpCode(200)
-  public async refreshUserTokens(
-    @Query(publicRuntimeConfig.twitch.refreshTokenName) refreshToken: string
-  ) {
+  public async refreshUserTokens(@Query('refresh_token') refreshToken: string) {
     const tokens = await this.twitchService.refreshUserToken(refreshToken);
     return formatedHttpResponse({ success: true, data: tokens });
   }
