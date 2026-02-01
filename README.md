@@ -2,13 +2,7 @@
 
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)
 ![Status](https://img.shields.io/badge/Status-🟢_Active_Development-success.svg)
-![Platforms](https://img.shields.io/badge/Platforms-Twitch_&_YouTube-orange.svg)
-
-![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)
-![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Platforms](https://img.shields.io/badge/Platforms-Twitch_&_YouTube-ff3f59.svg)
 
 ## 🚀 Overview
 
