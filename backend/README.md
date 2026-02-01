@@ -5,7 +5,6 @@ Brief description
 - Built with Node.js + NestJS, package manager — pnpm.
 
 Requirements
-- macOS
 - Docker & Docker Compose
 - Node.js 22 (for local development)
 - pnpm

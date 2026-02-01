@@ -4,7 +4,6 @@ import { Document } from 'mongoose';
 export type UserDocument = User & Document;
 
 @Schema({
-  timestamps: true,
   collection: 'users'
 })
 export class UserPlatformAuthData {
@@ -19,7 +18,6 @@ export class UserPlatformAuthData {
 }
 
 @Schema({
-  timestamps: true,
   collection: 'users'
 })
 export class UserPlatformData {
@@ -29,14 +27,17 @@ export class UserPlatformData {
   @Prop({ required: true })
   id: string;
 
+  @Prop({ type: UserPlatformAuthData, default: {} })
+  auth: UserPlatformAuthData;
+
   @Prop()
   login?: string;
 
   @Prop()
   profileImgUrl?: string;
 
-  @Prop({ type: UserPlatformAuthData, default: {} })
-  auth: UserPlatformAuthData;
+  @Prop({ type: Object })
+  properties?: Record<string, any>;
 }
 
 @Schema({
@@ -46,6 +47,9 @@ export class UserPlatformData {
 export class User {
   @Prop({ type: [UserPlatformData], default: [] })
   platforms: UserPlatformData[];
+
+  @Prop({ required: true, trim: true })
+  lang: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;

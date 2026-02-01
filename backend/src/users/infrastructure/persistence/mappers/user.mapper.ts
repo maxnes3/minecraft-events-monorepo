@@ -10,6 +10,7 @@ export class UserMapper {
     return UserEntity.restore(
       document._id.toString(),
       document.platforms,
+      document.lang,
       document.createdAt,
       document.updatedAt
     );
@@ -19,6 +20,7 @@ export class UserMapper {
     return {
       _id: user.getId(),
       platforms: user.getPlatforms(),
+      lang: user.getLang(),
       createdAt: user.getCreatedAt(),
       updatedAt: user.getUpdatedAt()
     };

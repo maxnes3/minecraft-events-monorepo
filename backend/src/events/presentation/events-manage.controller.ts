@@ -6,13 +6,15 @@ import {
   HttpCode,
   Param,
   Post,
-  Put
+  Put,
+  Query
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags
 } from '@nestjs/swagger';
 import { formatedHttpResponse } from '@/shared/http';
@@ -20,64 +22,107 @@ import { EventsService } from '../application/events.service';
 import { EventCreateDTO } from '../application/dto/event-create.dto';
 import { EventUpdateDTO } from '../application/dto/event-update.dto';
 import { publicRuntimeConfig } from '@/shared/config';
+import { User } from '@/auth';
+import { EventPresentationMapper } from './mappers/event-presentation.mapper';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
 @ApiTags('Events Manage')
 @Controller('events')
 export class EventsManageController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly eventPresentationMapper: EventPresentationMapper
+  ) {}
 
   @ApiOperation({ summary: 'Get event by id' })
   @ApiParam({ name: 'id', description: 'Event Id', type: String })
-  @Get('/:id')
+  @Get('owner/:id')
   @HttpCode(200)
   public async getEventById(@Param('id') eventId: string) {
     const event = await this.eventsService.getEventById(eventId);
     if (!event) {
       return formatedHttpResponse({ success: false });
     }
-    return formatedHttpResponse({ success: true, data: event });
+    return formatedHttpResponse({
+      success: true,
+      data: this.eventPresentationMapper.toPresentationDTO(event)
+    });
   }
 
-  @ApiOperation({ summary: 'Get events by user id' })
-  @ApiParam({ name: 'id', description: 'User Id', type: String })
-  @Get('/user/:id')
+  @ApiOperation({ summary: 'Get events by owner id' })
+  @Get('/owner')
   @HttpCode(200)
-  public async getEventsByUserId(@Param('id') userId: string) {
-    const events = await this.eventsService.getEventsByUserId(userId);
-    if (!events) {
+  public async getEventsByOwnerId(@User('sub') ownerId: string) {
+    const events = await this.eventsService.getEventsByOwnerId(ownerId);
+    if (!events || events.length === 0) {
       return formatedHttpResponse({ success: false });
     }
-    return formatedHttpResponse({ success: true, data: events });
+    return formatedHttpResponse({
+      success: true,
+      data: events.map((e) => this.eventPresentationMapper.toPresentationDTO(e))
+    });
+  }
+
+  @ApiOperation({ summary: 'Get events by owner id and game' })
+  @ApiQuery({ name: 'name', type: String, required: true })
+  @Get('/owner/game')
+  @HttpCode(200)
+  public async getEventsByOwnerIdAndGame(
+    @User('sub') userId: string,
+    @Query('name') game: string
+  ) {
+    const events = await this.eventsService.getEventsByOwnerIdAndGame(
+      userId,
+      game
+    );
+    if (!events || events.length === 0) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({
+      success: true,
+      data: events.map((e) => this.eventPresentationMapper.toPresentationDTO(e))
+    });
   }
 
   @ApiOperation({ summary: 'Create new event' })
   @ApiBody({ type: EventCreateDTO })
-  @Post()
+  @Post('/owner')
   @HttpCode(200)
-  public async createEvent(@Body() data: EventCreateDTO) {
-    const event = await this.eventsService.createEvent(data);
+  public async createEvent(
+    @User('sub') owner: string,
+    @Body() data: EventCreateDTO
+  ) {
+    const event = await this.eventsService.createEvent(owner, data);
     if (!event) {
       return formatedHttpResponse({ success: false });
     }
-    return formatedHttpResponse({ success: true, data: event });
+    return formatedHttpResponse({
+      success: true,
+      data: this.eventPresentationMapper.toPresentationDTO(event)
+    });
   }
 
   @ApiOperation({ summary: 'Update event by id' })
   @ApiParam({ name: 'id', description: 'Event Id', type: String })
-  @Put('/:id')
+  @Put('owner/:id')
   @HttpCode(200)
-  public async updateEvent(@Param('id') eventId: string, data: EventUpdateDTO) {
+  public async updateEvent(
+    @Param('id') eventId: string,
+    @Body() data: EventUpdateDTO
+  ) {
     const event = await this.eventsService.updateEventById(eventId, data);
     if (!event) {
       return formatedHttpResponse({ success: false });
     }
-    return formatedHttpResponse({ success: true, data: event });
+    return formatedHttpResponse({
+      success: true,
+      data: this.eventPresentationMapper.toPresentationDTO(event)
+    });
   }
 
   @ApiOperation({ summary: 'Delete event by id' })
   @ApiParam({ name: 'id', description: 'Event Id', type: String })
-  @Delete('/:id')
+  @Delete('owner/:id')
   @HttpCode(200)
   public async deleteEventById(@Param('id') eventId: string) {
     const success = await this.eventsService.deleteEventById(eventId);

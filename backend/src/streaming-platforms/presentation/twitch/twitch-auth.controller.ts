@@ -14,16 +14,17 @@ export class TwitchAuthController {
 
   @ApiOperation({ summary: 'Redirect to Twitch authorization URL' })
   @ApiQuery({
-    name: 'redirect_url',
-    description: 'Redirect to this URL after Twitch authorization',
+    name: 'is_client',
+    description: 'Redirect to Client URL after Twitch authorization',
+    type: Boolean,
     required: false
   })
   @Get('redirect')
   public redirectToTwitchAuth(
-    @Query('redirect_url') redirectUrl: string | undefined,
+    @Query('is_client') isClient: boolean | undefined,
     @Res() response: Response
   ) {
-    const authRedirectUrl = this.twitchService.getAuthUrl(redirectUrl);
+    const authRedirectUrl = this.twitchService.getAuthUrl(isClient);
     response.redirect(authRedirectUrl);
   }
 
@@ -45,8 +46,8 @@ export class TwitchAuthController {
     description: 'Error description if failed'
   })
   @ApiQuery({
-    name: 'redirect_url',
-    description: 'Redirect to this URL',
+    name: 'is_client',
+    description: 'Redirect to Client URL',
     required: false
   })
   @Get('callback')
@@ -55,7 +56,7 @@ export class TwitchAuthController {
     @Query('state') state: string | undefined,
     @Query('error') error: string | undefined,
     @Query('error_description') errorDescription: string | undefined,
-    @Query('is_client') isClient: boolean,
+    @Query('is_client') isClient: boolean | undefined,
     @Res() response: Response
   ) {
     if (error && errorDescription) {

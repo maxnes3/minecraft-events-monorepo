@@ -4,6 +4,7 @@ import { StreamingPlatformsModule } from '@/streaming-platforms';
 import { UsersModule } from '@/users';
 import { EventsManageController } from './presentation/events-manage.controller';
 import { EventsLaunchController } from './presentation/events-launch.controller';
+import { EventsVotingController } from './presentation/events-voting.controller';
 import { EventsService } from './application/events.service';
 import { EventMapper } from './infrastructure/persistence/mappers/event.mapper';
 import {
@@ -11,6 +12,7 @@ import {
   EventSchema
 } from './infrastructure/persistence/mongo/schemas/event.schema';
 import { EventsRepository } from './infrastructure/persistence/mongo/repositories/events.repository';
+import { EventPresentationMapper } from './presentation/mappers/event-presentation.mapper';
 
 @Module({
   imports: [
@@ -18,7 +20,16 @@ import { EventsRepository } from './infrastructure/persistence/mongo/repositorie
     StreamingPlatformsModule,
     UsersModule
   ],
-  controllers: [EventsManageController, EventsLaunchController],
-  providers: [EventsService, EventMapper, EventsRepository]
+  controllers: [
+    EventsManageController,
+    EventsLaunchController,
+    EventsVotingController
+  ],
+  providers: [
+    EventsService,
+    EventMapper,
+    EventPresentationMapper,
+    EventsRepository
+  ]
 })
 export class EventsModule {}

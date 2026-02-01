@@ -1,3 +1,3 @@
-export interface IChatAnnouncementDTO {
+export interface IStreamingPlatformSendChatAnnouncementDTO {
   message: string;
 }

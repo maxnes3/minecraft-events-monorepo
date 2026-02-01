@@ -14,16 +14,17 @@ export class YoutubeAuthController {
 
   @ApiOperation({ summary: 'Redirect to Youtube authorization URL' })
   @ApiQuery({
-    name: 'redirect_url',
-    description: 'Redirect to this URL after Youtube authorization',
+    name: 'is_client',
+    description: 'Redirect to Client URL after Youtube authorization',
+    type: Boolean,
     required: false
   })
   @Get('redirect')
   public redirectToYoutubeAuth(
-    @Query('redirect_url') redirectUrl: string | undefined,
+    @Query('is_client') isClient: boolean | undefined,
     @Res() response: Response
   ) {
-    const authRedirectUrl = this.youtubeService.getAuthUrl(redirectUrl);
+    const authRedirectUrl = this.youtubeService.getAuthUrl(isClient);
     response.redirect(authRedirectUrl);
   }
 
@@ -38,7 +39,7 @@ export class YoutubeAuthController {
   public async authCallback(
     @Query('code') code: string,
     @Query('error') error: string | undefined,
-    @Query('is_client') isClient: boolean,
+    @Query('is_client') isClient: boolean | undefined,
     @Res() response: Response
   ) {
     if (error) {

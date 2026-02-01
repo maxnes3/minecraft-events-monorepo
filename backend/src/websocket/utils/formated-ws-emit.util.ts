@@ -1,3 +1,4 @@
+import { WebSocketEmitDTO } from '../domain/dto/websocket-emit.dto';
 import { WebSocketConnectedDTO } from '../domain/dto/websocket-connected.dto';
 import { WebSocketErrorDTO } from '../domain/dto/websocket-error.dto';
 import { WebSocketEvents } from '../domain/websocket-events.enums';
@@ -12,13 +13,19 @@ export type WebSocketEventData<T extends WebSocketEvents> =
 
 export function formatWsEmit<T extends WebSocketEvents>({
   event,
-  data
+  data,
+  requestId,
+  status
 }: {
   event: T;
   data: WebSocketEventData<T>;
-}) {
+  requestId?: string;
+  status?: number;
+}): WebSocketEmitDTO<WebSocketEventData<T>> {
   return {
     event,
-    data
+    data,
+    status,
+    requestId
   };
 }

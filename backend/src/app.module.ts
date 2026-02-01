@@ -8,25 +8,19 @@ import { StreamingPlatformsModule } from './streaming-platforms';
 import { EventsModule } from './events';
 import { UsersModule } from './users';
 import { WebSocketModule } from './websocket';
-import { publicRuntimeConfig } from './shared/config';
+import { initMongooseAsyncConfig } from './shared/config';
 import { AuthGuard, AuthModule } from './auth';
 
 @Module({
   imports: [
-    MongooseModule.forRootAsync({
-      useFactory: () => ({
-        uri: publicRuntimeConfig.mongodb.uri,
-        retryAttempts: 3,
-        retryDelay: 1000
-      })
-    }),
+    MongooseModule.forRootAsync(initMongooseAsyncConfig),
     HttpModule,
     LoggerModule,
     I18nModule,
     StreamingPlatformsModule,
     EventsModule,
-    UsersModule,
     AuthModule,
+    UsersModule,
     WebSocketModule
   ],
   providers: [

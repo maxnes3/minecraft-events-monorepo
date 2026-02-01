@@ -7,8 +7,8 @@ import {
   StreamingPlatformsFactory,
   type StreamingPlatformAuthRequestDTO
 } from '@/streaming-platforms';
-import { EventAnnouncementDTO } from './dto/event-announcement.dto';
-import { EventStatus } from '../domain/entities/events.enums';
+import { EventSendAnnouncementDTO } from './dto/event-send-announcement.dto';
+import { EventStatus, EventsVotingStatus } from '../domain/events.enums';
 import { UsersService } from '@/users';
 import { EventDTO } from './dto/event.dto';
 import { EventCreateDTO } from './dto/event-create.dto';
@@ -17,6 +17,12 @@ import { EventEntity } from '../domain/entities/event.entity';
 import { EventUpdateDTO } from './dto/event-update.dto';
 import { EventStartDTO } from './dto/event-start.dto';
 import { EventCompleteDTO } from './dto/event-complete.dto';
+import { EventAnnouncementResultDTO } from './dto/event-announcement-result.dto';
+import { EventsVotingStartDTO } from './dto/events-voting-start.dto';
+import {
+  EVENT_STATUS_ANNOUNCEMENT_MESSAGES,
+  EVENTS_VOTING_ANNOUNCEMENT_MESSAGES
+} from './event-announcement-messages.constants';
 
 @Injectable()
 export class EventsService {
@@ -41,31 +47,62 @@ export class EventsService {
     return event.toDTO();
   }
 
-  public async getEventsByUserId(userId: string): Promise<EventDTO[] | null> {
-    const user = await this.usersService.getUserById(userId);
+  public async getEventsByOwnerId(ownerId: string): Promise<EventDTO[] | null> {
+    const user = await this.usersService.getUserById(ownerId);
     if (!user) {
-      this.logger.error(`User with ID ${userId} not found`);
+      this.logger.error(`User with ID ${ownerId} not found`);
       return null;
     }
 
-    const events = await this.eventsRepository.findByUserId(userId);
-    if (!events) {
-      this.logger.error(`Events with user ID ${userId} not found`);
+    const events = await this.eventsRepository.findByOwnerId(ownerId);
+    if (!events || events.length === 0) {
+      this.logger.error(`Events with owner ID ${ownerId} not found`);
       return null;
     }
-
     return events.map((event) => event.toDTO());
   }
 
-  public async createEvent(data: EventCreateDTO): Promise<EventDTO | null> {
-    this.logger.debug(`Creating event with name: ${data.name}`);
-    const user = await this.usersService.getUserById(data.owner);
+  public async getEventsByOwnerIdAndGame(
+    owner: string,
+    game: string
+  ): Promise<EventDTO[] | null> {
+    const user = await this.usersService.getUserById(owner);
     if (!user) {
-      this.logger.error(`User with ID ${data.owner} not found`);
+      this.logger.error(`User with ID ${owner} not found`);
       return null;
     }
 
-    const event = EventEntity.create(data.owner, data.name, data.duration);
+    const events = await this.eventsRepository.findByOwnerIdAndGame(
+      owner,
+      game
+    );
+    if (!events || events.length === 0) {
+      this.logger.error(
+        `Events with owner ID ${owner} and game ${game} not found`
+      );
+      return null;
+    }
+    return events.map((event) => event.toDTO());
+  }
+
+  public async createEvent(
+    owner: string,
+    data: EventCreateDTO
+  ): Promise<EventDTO | null> {
+    this.logger.debug(`Creating event with name: ${data.name}`);
+    const user = await this.usersService.getUserById(owner);
+    if (!user) {
+      this.logger.error(`User with ID ${owner} not found`);
+      return null;
+    }
+
+    const event = EventEntity.create(
+      owner,
+      data.name,
+      data.game,
+      data.quality,
+      data.duration
+    );
     await this.eventsRepository.save(event);
 
     this.logger.debug(`Event created with ID: ${event.getId()}`);
@@ -89,67 +126,113 @@ export class EventsService {
     return event.toDTO();
   }
 
-  public async startEvent(
-    eventId: string,
-    data: EventStartDTO,
+  public async startVotingForEvents(
+    ownerId: string,
+    data: EventsVotingStartDTO,
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<boolean> {
-    const exists = await this.eventsRepository.existsById(eventId);
-    if (!exists) {
-      this.logger.error(`Event with ID ${eventId} not found`);
-      return false;
+  ): Promise<EventAnnouncementResultDTO | null> {
+    const events = await this.eventsRepository.findByOwnerIdAndGame(
+      ownerId,
+      data.game
+    );
+    if (!events || events.length === 0) {
+      this.logger.error(
+        `Events with owner ID ${ownerId} and game ${data.game} not found`
+      );
+      return null;
     }
 
-    await this.eventsRepository.changeEventStatus(eventId, EventStatus.STARTED);
-
-    const eventSended = await this.sendEventAnnouncement(
-      { status: EventStatus.STARTED, platform: StreamingPlatforms.TWITCH },
+    const message = this.getAnnouncementMessage(
+      EVENTS_VOTING_ANNOUNCEMENT_MESSAGES[EventsVotingStatus.STARTED],
+      {},
+      data.lang
+    );
+    const result = await this.sendEventAnnouncement(
+      {
+        message,
+        platform: data.platform
+      },
       authData
     );
-    return eventSended;
+    return result;
   }
 
-  public async completeEvent(
-    eventId: string,
-    data: EventCompleteDTO,
+  public async startEvent(
+    data: EventStartDTO,
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<boolean> {
-    const event = await this.eventsRepository.findById(eventId);
-    if (!event) {
-      this.logger.error(`Event with ID ${eventId} not found`);
-      return false;
+  ): Promise<EventAnnouncementResultDTO | null> {
+    const exists = await this.eventsRepository.existsById(data.eventId);
+    if (!exists) {
+      this.logger.error(`Event with ID ${data.eventId} not found`);
+      return null;
     }
 
     await this.eventsRepository.changeEventStatus(
-      eventId,
+      data.eventId,
+      EventStatus.STARTED
+    );
+
+    const message = this.getAnnouncementMessage(
+      EVENT_STATUS_ANNOUNCEMENT_MESSAGES[EventStatus.STARTED],
+      {},
+      data.lang
+    );
+    const result = await this.sendEventAnnouncement(
+      { message, platform: data.platform },
+      authData
+    );
+    return result;
+  }
+
+  public async completeEvent(
+    data: EventCompleteDTO,
+    authData: StreamingPlatformAuthRequestDTO
+  ): Promise<EventAnnouncementResultDTO | null> {
+    const event = await this.eventsRepository.findById(data.eventId);
+    if (!event) {
+      this.logger.error(`Event with ID ${data.eventId} not found`);
+      return null;
+    }
+
+    await this.eventsRepository.changeEventStatus(
+      data.eventId,
       EventStatus.COMPLETED
     );
 
-    const isEventSended = await this.sendEventAnnouncement(
-      { status: EventStatus.COMPLETED, platform: StreamingPlatforms.TWITCH },
+    const message = this.getAnnouncementMessage(
+      EVENT_STATUS_ANNOUNCEMENT_MESSAGES[EventStatus.COMPLETED],
+      {},
+      data.lang
+    );
+    const result = await this.sendEventAnnouncement(
+      {
+        message,
+        platform: data.platform
+      },
       authData
     );
-    return isEventSended;
+    return result;
   }
 
   public async sendEventAnnouncement(
-    data: EventAnnouncementDTO,
+    data: EventSendAnnouncementDTO,
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<boolean> {
+  ): Promise<EventAnnouncementResultDTO | null> {
     try {
-      const message = this.getEventAnnouncementMessage(
-        data.status,
-        {},
-        data.lang
-      );
       const platform = data.platform as StreamingPlatforms;
       const response = await this.streamingFactory
         .getService(platform)
-        .sendChatAnnouncement({ message }, authData);
-      return response;
+        .sendChatAnnouncement({ message: data.message }, authData);
+      if (!response) {
+        this.logger.error(
+          `Failed to send event announcement on ${platform} platform`
+        );
+        return null;
+      }
+      return { message: data.message };
     } catch (error) {
       this.logger.error(`Failed to send chat announcement ${error}`);
-      return false;
+      return null;
     }
   }
 
@@ -167,17 +250,12 @@ export class EventsService {
     return true;
   }
 
-  private getEventAnnouncementMessage(
-    status: EventStatus,
+  private getAnnouncementMessage(
+    tKey: string,
     { ...args },
     lang: string = publicRuntimeConfig.i18n.fallbackLanguage
   ): string {
-    const messageKeys: Record<EventStatus, string> = {
-      [EventStatus.READY]: '',
-      [EventStatus.STARTED]: 'announcements.started.command',
-      [EventStatus.COMPLETED]: 'announcements.completed'
-    };
     const translateData = { lang, ...args };
-    return this.i18nClient.translate(messageKeys[status], translateData);
+    return this.i18nClient.translate(tKey, translateData);
   }
 }

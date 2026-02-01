@@ -131,4 +131,29 @@ export class UsersRepository implements IUsersRepository {
       .exec();
     return this.mapper.toDomain(document);
   }
+
+  public async updatePlatformPropertiesAtUser(
+    userId: string,
+    platformName: string,
+    properties: Record<string, any>
+  ): Promise<UserEntity | null> {
+    const document = await this.userModel
+      .findOneAndUpdate(
+        {
+          _id: userId,
+          'platforms.name': platformName
+        },
+        {
+          $set: {
+            'platforms.$.properties': properties,
+            updatedAt: new Date()
+          }
+        },
+        {
+          new: true
+        }
+      )
+      .exec();
+    return this.mapper.toDomain(document);
+  }
 }

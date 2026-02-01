@@ -7,6 +7,7 @@ import { UserEntity } from '../domain/entities/user.entity';
 import { UserConnectPlatformDTO } from './dto/user-connect-platform.dto';
 import { UserRemovePlatformDTO } from './dto/user-remove-platform.dto';
 import { UserPlatformDTO } from './dto/user-platform.dto';
+import { UserUpdatePreferencesDTO } from './dto/user-update-preferences.dto';
 
 @Injectable()
 export class UsersService {
@@ -83,6 +84,23 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     this.logger.debug(`User created with ID: ${user.getId()}`);
+    return user.toDTO();
+  }
+
+  public async updateUserPreferences(
+    userId: string,
+    data: UserUpdatePreferencesDTO
+  ): Promise<UserDTO | null> {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.logger.error(`User with ID ${userId} not found`);
+      return null;
+    }
+
+    user.setLang(data.lang || user.getLang());
+    await this.usersRepository.update(user);
+
+    this.logger.debug(`User updated preferences with ID: ${user.getId()}`);
     return user.toDTO();
   }
 

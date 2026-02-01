@@ -1,14 +1,8 @@
-import { Body, Controller, HttpCode, Param, Post } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiTags
-} from '@nestjs/swagger';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { formatedHttpResponse } from '@/shared/http';
 import { EventsService } from '../application/events.service';
-import { EventAnnouncementDTO } from '../application/dto/event-announcement.dto';
+import { EventSendAnnouncementDTO } from '../application/dto/event-send-announcement.dto';
 import { EventCompleteDTO } from '../application/dto/event-complete.dto';
 import { EventStartDTO } from '../application/dto/event-start.dto';
 import { User } from '@/auth';
@@ -25,13 +19,11 @@ export class EventsLaunchController {
   ) {}
 
   @ApiOperation({ summary: 'Start event' })
-  @ApiParam({ name: 'id', description: 'Event Id', type: String })
   @ApiBody({ type: EventStartDTO })
-  @Post('/:id/start')
+  @Post('/start')
   @HttpCode(200)
   public async startEvent(
     @User('sub') userId: string,
-    @Param('id') eventId: string,
     @Body() data: EventStartDTO
   ) {
     const userPlatformData =
@@ -42,25 +34,27 @@ export class EventsLaunchController {
     if (!userPlatformData) {
       return formatedHttpResponse({ success: false });
     }
+
     const {
       id: platformId,
       auth: { accessToken }
     } = userPlatformData;
-    const success = await this.eventsService.startEvent(eventId, data, {
+    const result = await this.eventsService.startEvent(data, {
       accessToken,
       platformId
     });
-    return formatedHttpResponse({ success });
+    if (!result) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({ success: true, data: result });
   }
 
   @ApiOperation({ summary: 'Complete event' })
-  @ApiParam({ name: 'id', description: 'Event Id', type: String })
   @ApiBody({ type: EventCompleteDTO })
-  @Post('/:id/complete')
+  @Post('/complete')
   @HttpCode(200)
   public async completeEvent(
     @User('sub') userId: string,
-    @Param('id') eventId: string,
     @Body() data: EventCompleteDTO
   ) {
     const userPlatformData =
@@ -71,15 +65,19 @@ export class EventsLaunchController {
     if (!userPlatformData) {
       return formatedHttpResponse({ success: false });
     }
+
     const {
       id: platformId,
       auth: { accessToken }
     } = userPlatformData;
-    const success = await this.eventsService.completeEvent(eventId, data, {
+    const result = await this.eventsService.completeEvent(data, {
       accessToken,
       platformId
     });
-    return formatedHttpResponse({ success });
+    if (!result) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({ success: true, data: result });
   }
 
   @ApiOperation({ summary: 'Send event announcement' })
@@ -87,7 +85,7 @@ export class EventsLaunchController {
   @HttpCode(200)
   public async sendEventAnnouncement(
     @User('sub') userId: string,
-    @Body() data: EventAnnouncementDTO
+    @Body() data: EventSendAnnouncementDTO
   ) {
     const userPlatformData =
       await this.usersService.getPlatformDataByUserIdAndPlatformName(
@@ -97,14 +95,18 @@ export class EventsLaunchController {
     if (!userPlatformData) {
       return formatedHttpResponse({ success: false });
     }
+
     const {
       id: platformId,
       auth: { accessToken }
     } = userPlatformData;
-    const success = await this.eventsService.sendEventAnnouncement(data, {
+    const result = await this.eventsService.sendEventAnnouncement(data, {
       accessToken,
       platformId
     });
-    return formatedHttpResponse({ success });
+    if (!result) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({ success: true, data: result });
   }
 }

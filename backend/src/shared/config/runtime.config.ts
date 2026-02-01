@@ -1,5 +1,6 @@
 export const publicRuntimeConfig = {
   application: {
+    env: process.env.NESTJS_APPLICATION_ENV || '',
     version: process.env.NESTJS_APPLICATION_VERSION || '1.0.0',
     port: process.env.NESTJS_APPLICATION_PORT || 3000,
     apiPrefix: process.env.NESTJS_APPLICATION_API_PREFIX || 'api/v1'
@@ -12,11 +13,12 @@ export const publicRuntimeConfig = {
     refreshTokenHeader: process.env.NESTJS_REFRESH_TOKEN_HEADER || ''
   },
   swagger: {
+    enabled: process.env.NESTJS_SWAGGER_ENABLED === 'true' || false,
     title: process.env.NESTJS_SWAGGER_TITLE || '',
     description: process.env.NESTJS_SWAGGER_DESCRIPTION || ''
   },
-  clients: {
-    allowedUrls: process.env.NESTJS_CLIENTS_ALLOWED_URLS?.split(',') || []
+  client: {
+    url: process.env.NESTJS_CLIENT_URL || ''
   },
   i18n: {
     fallbackLanguage: process.env.NESTJS_I18N_FALLBACK_LANGUAGE || 'en',

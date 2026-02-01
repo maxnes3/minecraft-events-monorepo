@@ -11,6 +11,8 @@ export class EventMapper {
       document._id.toString(),
       document.owner,
       document.name,
+      document.game,
+      document.quality,
       document.duration,
       document.status,
       document.createdAt,
@@ -18,14 +20,16 @@ export class EventMapper {
     );
   }
 
-  public toPersistence(user: EventEntity): Record<string, any> {
+  public toPersistence(event: EventEntity): Record<string, any> {
     return {
-      _id: user.getId(),
-      owner: user.getOwner(),
-      name: user.getName(),
-      duration: user.getDuration(),
-      createdAt: user.getCreatedAt(),
-      updatedAt: user.getUpdatedAt()
+      _id: event.getId(),
+      owner: event.getOwner(),
+      name: event.getName(),
+      game: event.getGame(),
+      quality: event.getQuality(),
+      duration: event.getDuration(),
+      createdAt: event.getCreatedAt(),
+      updatedAt: event.getUpdatedAt()
     };
   }
 }
