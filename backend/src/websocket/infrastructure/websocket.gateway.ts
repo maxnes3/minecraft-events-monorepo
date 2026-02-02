@@ -7,7 +7,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { WebSocketService } from '../application/websocket.service';
 
-@NestWebSocketGateway()
+@NestWebSocketGateway({
+  namespace: '/ws'
+})
 export class WebSocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {

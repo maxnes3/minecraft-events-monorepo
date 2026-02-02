@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EventsVotingStartDTO } from '../application/dto/events-voting-start.dto';
 import { EventsService } from '../application/events.service';
 import { UsersService } from '@/users';
-import { User } from '@/auth';
+import { AuthUser } from '@/auth';
 import { formatedHttpResponse } from '@/shared/http';
 import { publicRuntimeConfig } from '@/shared/config';
 
@@ -20,7 +20,7 @@ export class EventsVotingController {
   @Post('/start')
   @HttpCode(200)
   public async startVoting(
-    @User('sub') owner: string,
+    @AuthUser('sub') owner: string,
     @Body() data: EventsVotingStartDTO
   ) {
     const userPlatformData =

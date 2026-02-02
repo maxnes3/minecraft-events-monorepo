@@ -2,7 +2,7 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { AuthExtendedRequest } from '@/auth/domain/interfaces/auth-extended-request.interface';
 import { AuthTokenPayloadDTO } from '@/auth/domain/dto/auth-token-payload.dto';
 
-export const User = createParamDecorator(
+export const AuthUser = createParamDecorator(
   <K extends keyof AuthTokenPayloadDTO>(
     data: K | undefined,
     ctx: ExecutionContext

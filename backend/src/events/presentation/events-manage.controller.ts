@@ -22,7 +22,7 @@ import { EventsService } from '../application/events.service';
 import { EventCreateDTO } from '../application/dto/event-create.dto';
 import { EventUpdateDTO } from '../application/dto/event-update.dto';
 import { publicRuntimeConfig } from '@/shared/config';
-import { User } from '@/auth';
+import { AuthUser } from '@/auth';
 import { EventPresentationMapper } from './mappers/event-presentation.mapper';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
@@ -52,7 +52,7 @@ export class EventsManageController {
   @ApiOperation({ summary: 'Get events by owner id' })
   @Get('/owner')
   @HttpCode(200)
-  public async getEventsByOwnerId(@User('sub') ownerId: string) {
+  public async getEventsByOwnerId(@AuthUser('sub') ownerId: string) {
     const events = await this.eventsService.getEventsByOwnerId(ownerId);
     if (!events || events.length === 0) {
       return formatedHttpResponse({ success: false });
@@ -68,7 +68,7 @@ export class EventsManageController {
   @Get('/owner/game')
   @HttpCode(200)
   public async getEventsByOwnerIdAndGame(
-    @User('sub') userId: string,
+    @AuthUser('sub') userId: string,
     @Query('name') game: string
   ) {
     const events = await this.eventsService.getEventsByOwnerIdAndGame(
@@ -89,7 +89,7 @@ export class EventsManageController {
   @Post('/owner')
   @HttpCode(200)
   public async createEvent(
-    @User('sub') owner: string,
+    @AuthUser('sub') owner: string,
     @Body() data: EventCreateDTO
   ) {
     const event = await this.eventsService.createEvent(owner, data);

@@ -4,7 +4,7 @@ import { UsersService } from '../application/users.service';
 import { UserUpdatePreferencesDTO } from '../application/dto/user-update-preferences.dto';
 import { formatedHttpResponse } from '@/shared/http';
 import { publicRuntimeConfig } from '@/shared/config';
-import { User } from '@/auth';
+import { AuthUser } from '@/auth';
 import { UserPresentationMapper } from './mappers/users-presentation.mapper';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
@@ -19,7 +19,7 @@ export class UsersManageController {
   @ApiOperation({ summary: 'Get User' })
   @Get('/me')
   @HttpCode(200)
-  public async getUserById(@User('sub') userId: string) {
+  public async getUserById(@AuthUser('sub') userId: string) {
     const user = await this.usersService.getUserById(userId);
     if (!user) {
       return formatedHttpResponse({ success: false });
@@ -33,7 +33,7 @@ export class UsersManageController {
   @ApiOperation({ summary: 'Delete exists User' })
   @Delete('/me')
   @HttpCode(200)
-  public async deleteUserById(@User('sub') userId: string) {
+  public async deleteUserById(@AuthUser('sub') userId: string) {
     const success = await this.usersService.deleteUserById(userId);
     return formatedHttpResponse({ success });
   }
@@ -43,7 +43,7 @@ export class UsersManageController {
   @Put('/me/preferences')
   @HttpCode(200)
   public async updateUserPreferences(
-    @User('sub') userId: string,
+    @AuthUser('sub') userId: string,
     data: UserUpdatePreferencesDTO
   ) {
     const user = await this.usersService.updateUserPreferences(userId, data);

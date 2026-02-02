@@ -5,7 +5,7 @@ import { EventsService } from '../application/events.service';
 import { EventSendAnnouncementDTO } from '../application/dto/event-send-announcement.dto';
 import { EventCompleteDTO } from '../application/dto/event-complete.dto';
 import { EventStartDTO } from '../application/dto/event-start.dto';
-import { User } from '@/auth';
+import { AuthUser } from '@/auth';
 import { UsersService } from '@/users';
 import { publicRuntimeConfig } from '@/shared/config';
 
@@ -23,7 +23,7 @@ export class EventsLaunchController {
   @Post('/start')
   @HttpCode(200)
   public async startEvent(
-    @User('sub') userId: string,
+    @AuthUser('sub') userId: string,
     @Body() data: EventStartDTO
   ) {
     const userPlatformData =
@@ -54,7 +54,7 @@ export class EventsLaunchController {
   @Post('/complete')
   @HttpCode(200)
   public async completeEvent(
-    @User('sub') userId: string,
+    @AuthUser('sub') userId: string,
     @Body() data: EventCompleteDTO
   ) {
     const userPlatformData =
@@ -84,7 +84,7 @@ export class EventsLaunchController {
   @Post('send/announcement')
   @HttpCode(200)
   public async sendEventAnnouncement(
-    @User('sub') userId: string,
+    @AuthUser('sub') userId: string,
     @Body() data: EventSendAnnouncementDTO
   ) {
     const userPlatformData =
