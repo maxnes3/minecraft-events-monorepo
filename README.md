@@ -1,8 +1,8 @@
 # 🎮 Streaming Events Platform
 
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)
-![Status](https://img.shields.io/badge/Status-🟢_Active_Development-gray.svg)
-![Platforms](https://img.shields.io/badge/Platforms-Twitch_&_YouTube-purple.svg)
+![Status](https://img.shields.io/badge/Status-Active_Development-oa6522.svg)
+![Platforms](https://img.shields.io/badge/Platforms-Twitch_&_YouTube-6441a4.svg)
 
 ## 🚀 Overview
 
