@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AuthService } from '@/auth';
-import { UsersService } from '@/users';
-import { LoggerService } from '@/shared/logger';
-import { publicRuntimeConfig } from '@/shared/config';
+import { AuthService } from '@app/auth';
+import { UsersService } from '@app/users';
+import { LoggerService } from '@app/shared/logger';
+import { publicRuntimeConfig } from '@app/shared/config';
 import { YoutubeApiUserTokensDTO } from './dto/youtube-api-user-tokens.dto';
-import { HttpClient, HttpRequestConfig } from '@/shared/http';
+import { HttpClient, HttpRequestConfig } from '@app/shared/http';
 import { YoutubeMapper } from './mappers/youtube.mappers';
 import { YoutubeApiUserResponse } from './dto/youtube-api-user.dto';
-import { YoutubeChatAnnouncementDTO } from './dto/youtube-chat-announcement.dto';
-import { StreamingPlatformTokensDTO } from '@/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
-import { StreamingPlaftormUserDTO } from '@/streaming-platforms/domain/dto/streaming-platform-user.dto';
-import { IStreamingPlatformService } from '@/streaming-platforms/domain/interfaces/streaming-platform-service.interface';
+import { YoutubeSendMessageDTO } from './dto/youtube-send-message.dto';
+import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { IStreamingPlatformService } from '@app/streaming-platforms/domain/interfaces/streaming-platform-service.interface';
 import { YoutubeApiStreamResponse } from './dto/youtube-api-stream.dto';
-import { StreamingPlatformAuthDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth.dto';
-import { StreamingPlatformAuthRequestDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
+import { StreamingPlatformAuthDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth.dto';
+import { StreamingPlatformAuthRequestDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
+import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 
 @Injectable()
 export class YoutubePlatformService implements IStreamingPlatformService {
@@ -41,14 +42,18 @@ export class YoutubePlatformService implements IStreamingPlatformService {
     this.logger.setContext(YoutubePlatformService.name);
   }
 
-  public getAuthUrl(redirectUrl?: string): string {
+  public getAuthUrl(isClient?: boolean): string {
     const authUrl = new URL(`${this.accountsUrl}/o/oauth2/v2/auth`);
+    const redirectUri = isClient
+      ? publicRuntimeConfig.client.url
+      : this.redirectUrl;
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: redirectUrl || this.redirectUrl,
+      redirect_uri: redirectUri,
       response_type: 'code',
-      access_type: 'online',
       scope: publicRuntimeConfig.youtube.authScopes.join(' '),
+      access_type: 'offline',
+      prompt: 'consent',
       state: ''
     });
 
@@ -80,7 +85,6 @@ export class YoutubePlatformService implements IStreamingPlatformService {
         params.toString(),
         config
       );
-      this.logger.debug(`User token data: ${JSON.stringify(response.data)}`);
       return this.youtubeMapper.toStreamingPlatformTokensDTO(response.data);
     } catch (error) {
       this.logger.error('Failed to exchange code for token', error);
@@ -89,7 +93,57 @@ export class YoutubePlatformService implements IStreamingPlatformService {
   }
 
   public isTokenExpired(tokens: StreamingPlatformTokensDTO): boolean {
-    return false;
+    if (tokens.expiresIn === 0) {
+      this.logger.debug('Token has expiresIn = 0, considered never-expiring');
+      return false;
+    }
+
+    if (!tokens.accessToken || tokens.accessToken.trim().length === 0) {
+      this.logger.warn('Token has empty accessToken, considering expired');
+      return true;
+    }
+
+    if (!tokens.obtainedAt) {
+      this.logger.warn('Token missing obtainedAt, assuming expired');
+      return true;
+    }
+
+    try {
+      const obtainedAt = new Date(tokens.obtainedAt);
+
+      if (isNaN(obtainedAt.getTime())) {
+        this.logger.warn('Token has invalid obtainedAt date, assuming expired');
+        return true;
+      }
+
+      const expirationTime = obtainedAt.getTime() + tokens.expiresIn * 1000;
+      const currentTime = Date.now();
+
+      const bufferMs = 30 * 1000;
+      const isExpired = currentTime >= expirationTime - bufferMs;
+
+      if (isExpired) {
+        this.logger.debug(
+          `Token expired. Obtained: ${obtainedAt.toISOString()}, ` +
+            `Duration: ${tokens.expiresIn}s, ` +
+            `Current: ${new Date().toISOString()}`
+        );
+      } else {
+        const timeLeftSeconds = Math.round(
+          (expirationTime - currentTime) / 1000
+        );
+        const timeLeftMinutes = Math.round((timeLeftSeconds / 60) * 10) / 10;
+
+        this.logger.debug(
+          `Token valid for ${timeLeftSeconds}s (${timeLeftMinutes} min)`
+        );
+      }
+
+      return isExpired;
+    } catch (error) {
+      this.logger.error(`Error checking token expiration: ${error}`);
+      return true;
+    }
   }
 
   public async refreshUserToken(
@@ -114,9 +168,6 @@ export class YoutubePlatformService implements IStreamingPlatformService {
         tokenUrl,
         params.toString(),
         config
-      );
-      this.logger.debug(
-        `Refreshed token data: ${JSON.stringify(response.data)}`
       );
       return this.youtubeMapper.toStreamingPlatformTokensDTO(response.data);
     } catch (error) {
@@ -152,9 +203,6 @@ export class YoutubePlatformService implements IStreamingPlatformService {
         return null;
       }
 
-      this.logger.debug(
-        `YouTube user data: ${JSON.stringify(response.data.items[0])}`
-      );
       return this.youtubeMapper.toStreamingPlatformUserDTO(
         response.data.items[0]
       );
@@ -191,7 +239,9 @@ export class YoutubePlatformService implements IStreamingPlatformService {
     };
   }
 
-  public async getStreamInLive(authData: StreamingPlatformAuthRequestDTO) {
+  public async getStreamInLive(
+    authData: StreamingPlatformAuthRequestDTO
+  ): Promise<StreamingPlaftormStreamDTO | null> {
     const streamInLiveUrl = `${this.apiUrl}/youtube/v3/liveBroadcasts`;
     const params = {
       part: 'snippet',
@@ -216,24 +266,24 @@ export class YoutubePlatformService implements IStreamingPlatformService {
         return null;
       }
 
-      this.logger.debug(
-        `YouTube streams data: ${JSON.stringify(response.data.items[0])}`
+      return this.youtubeMapper.toStreamingPlatformStreamDTO(
+        response.data.items[0]
       );
-      return response.data.items[0];
     } catch (error) {
       this.logger.error('Failed to fetch YouTube streams information', error);
       throw new Error(`Failed to get YouTube streams: ${error}`);
     }
   }
 
-  public async sendChatAnnouncement(
-    data: YoutubeChatAnnouncementDTO,
+  public async sendMessage(
+    data: YoutubeSendMessageDTO,
     authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
     if (
       !authData.platformProperties ||
       !authData.platformProperties['liveChatId']
     ) {
+      this.logger.error(`Not found liveChatId in AuthData Properties`);
       return false;
     }
 

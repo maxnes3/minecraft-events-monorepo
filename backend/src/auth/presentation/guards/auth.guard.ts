@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { AuthService } from '@/auth/application/auth.service';
-import { AuthTokensFromHeadersDTO } from '@/auth/domain/dto/auth-tokens-from-headers.dto';
+import { AuthService } from '@app/auth/application/auth.service';
+import { AuthTokensFromHeadersDTO } from '@app/auth/domain/dto/auth-tokens-from-headers.dto';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { normalizeHttpRequestHeaders } from '@/shared/http';
-import { AuthExtendedRequest } from '@/auth/domain/interfaces/auth-extended-request.interface';
+import { normalizeHttpRequestHeaders } from '@app/shared/http';
+import { AuthExtendedRequest } from '@app/auth/domain/interfaces/auth-extended-request.interface';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

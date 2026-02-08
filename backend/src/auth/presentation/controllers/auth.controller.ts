@@ -1,11 +1,9 @@
-import { AuthService } from '@/auth/application/auth.service';
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { AuthService } from '@app/auth/application/auth.service';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../decorators/public.decorator';
-import { AuthRefreshTokensDTO } from '@/auth/application/dto/auth-refresh-tokens.dto';
-import type { Response } from 'express';
-import { formatedHttpResponse } from '@/shared/http';
-import { publicRuntimeConfig } from '@/shared/config';
+import { AuthRefreshTokensDTO } from '@app/auth/application/dto/auth-refresh-tokens.dto';
+import { formatedHttpResponse } from '@app/shared/http';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -15,20 +13,9 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: 'Refresh authentication tokens' })
   @ApiBody({ type: AuthRefreshTokensDTO, required: true })
-  @Post('refresh-token')
-  public async refreshToken(
-    @Body() data: AuthRefreshTokensDTO,
-    @Res() response: Response
-  ) {
+  @Post('refresh-tokens')
+  public async refreshToken(@Body() data: AuthRefreshTokensDTO) {
     const tokens = await this.authService.refreshTokens(data.refreshToken);
-    response.appendHeader(
-      publicRuntimeConfig.jwt.authorizationHeader,
-      `Bearer ${tokens.accessToken}`
-    );
-    response.appendHeader(
-      publicRuntimeConfig.jwt.refreshTokenHeader,
-      `Bearer ${tokens.refreshToken}`
-    );
-    return formatedHttpResponse({ success: true });
+    return formatedHttpResponse({ success: true, data: tokens });
   }
 }

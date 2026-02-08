@@ -1,8 +1,8 @@
-import { LoggerService } from '@/shared/logger';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { LoggerService } from '@app/shared/logger';
+import { publicRuntimeConfig } from '@app/shared/config';
 import { AuthTokensDTO } from './dto/auth-tokens.dto';
-import { publicRuntimeConfig } from '@/shared/config';
 import { AuthTokenPayloadDTO } from '../domain/dto/auth-token-payload.dto';
 
 @Injectable()

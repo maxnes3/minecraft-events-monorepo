@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from '@/users';
+import { UsersModule } from '@app/users';
+import { AuthModule } from '@app/auth';
+import { WebSocketModule } from '@app/websocket';
 import { TwitchAuthController } from './presentation/twitch/twitch-auth.controller';
 import { TwitchStreamController } from './presentation/twitch/twitch-stream.controller';
 import { TwitchPlatformService } from './infrastructure/twitch/twitch-platform.service';
@@ -9,10 +11,10 @@ import { YoutubePlatformService } from './infrastructure/youtube/youtube-patform
 import { YoutubeMapper } from './infrastructure/youtube/mappers/youtube.mappers';
 import { YoutubeAuthController } from './presentation/youtube/youtube-auth.controller';
 import { YoutubeStreamController } from './presentation/youtube/youtube-stream.controller';
-import { AuthModule } from '@/auth';
+import { StreamingPlatformsHandlers } from './presentation/streaming-platforms.handlers';
 
 @Module({
-  imports: [AuthModule, UsersModule],
+  imports: [AuthModule, UsersModule, WebSocketModule],
   controllers: [
     TwitchAuthController,
     TwitchStreamController,
@@ -24,8 +26,9 @@ import { AuthModule } from '@/auth';
     TwitchMapper,
     YoutubePlatformService,
     YoutubeMapper,
-    StreamingPlatformsFactory
+    StreamingPlatformsFactory,
+    StreamingPlatformsHandlers
   ],
-  exports: [StreamingPlatformsFactory]
+  exports: [StreamingPlatformsFactory, StreamingPlatformsHandlers]
 })
 export class StreamingPlatformsModule {}

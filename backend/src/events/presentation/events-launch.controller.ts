@@ -1,19 +1,13 @@
-import { Body, Controller, HttpCode, Param, Post } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiTags
-} from '@nestjs/swagger';
-import { formatedHttpResponse } from '@/shared/http';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { formatedHttpResponse } from '@app/shared/http';
 import { EventsService } from '../application/events.service';
-import { EventAnnouncementDTO } from '../application/dto/event-announcement.dto';
+import { EventSendMessageDTO } from '../application/dto/event-send-message.dto';
 import { EventCompleteDTO } from '../application/dto/event-complete.dto';
 import { EventStartDTO } from '../application/dto/event-start.dto';
-import { User } from '@/auth';
-import { UsersService } from '@/users';
-import { publicRuntimeConfig } from '@/shared/config';
+import { AuthUser } from '@app/auth';
+import { UsersService } from '@app/users';
+import { publicRuntimeConfig } from '@app/shared/config';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
 @ApiTags('Events Launch')
@@ -25,13 +19,11 @@ export class EventsLaunchController {
   ) {}
 
   @ApiOperation({ summary: 'Start event' })
-  @ApiParam({ name: 'id', description: 'Event Id', type: String })
   @ApiBody({ type: EventStartDTO })
-  @Post('/:id/start')
+  @Post('/start')
   @HttpCode(200)
   public async startEvent(
-    @User('sub') userId: string,
-    @Param('id') eventId: string,
+    @AuthUser('sub') userId: string,
     @Body() data: EventStartDTO
   ) {
     const userPlatformData =
@@ -42,25 +34,27 @@ export class EventsLaunchController {
     if (!userPlatformData) {
       return formatedHttpResponse({ success: false });
     }
+
     const {
       id: platformId,
       auth: { accessToken }
     } = userPlatformData;
-    const success = await this.eventsService.startEvent(eventId, data, {
+    const result = await this.eventsService.startEvent(data, {
       accessToken,
       platformId
     });
-    return formatedHttpResponse({ success });
+    if (!result) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({ success: true, data: result });
   }
 
   @ApiOperation({ summary: 'Complete event' })
-  @ApiParam({ name: 'id', description: 'Event Id', type: String })
   @ApiBody({ type: EventCompleteDTO })
-  @Post('/:id/complete')
+  @Post('/complete')
   @HttpCode(200)
   public async completeEvent(
-    @User('sub') userId: string,
-    @Param('id') eventId: string,
+    @AuthUser('sub') userId: string,
     @Body() data: EventCompleteDTO
   ) {
     const userPlatformData =
@@ -71,23 +65,27 @@ export class EventsLaunchController {
     if (!userPlatformData) {
       return formatedHttpResponse({ success: false });
     }
+
     const {
       id: platformId,
       auth: { accessToken }
     } = userPlatformData;
-    const success = await this.eventsService.completeEvent(eventId, data, {
+    const result = await this.eventsService.completeEvent(data, {
       accessToken,
       platformId
     });
-    return formatedHttpResponse({ success });
+    if (!result) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({ success: true, data: result });
   }
 
-  @ApiOperation({ summary: 'Send event announcement' })
-  @Post('send/announcement')
+  @ApiOperation({ summary: 'Send event message at Platform' })
+  @Post('send/message')
   @HttpCode(200)
   public async sendEventAnnouncement(
-    @User('sub') userId: string,
-    @Body() data: EventAnnouncementDTO
+    @AuthUser('sub') userId: string,
+    @Body() data: EventSendMessageDTO
   ) {
     const userPlatformData =
       await this.usersService.getPlatformDataByUserIdAndPlatformName(
@@ -97,14 +95,18 @@ export class EventsLaunchController {
     if (!userPlatformData) {
       return formatedHttpResponse({ success: false });
     }
+
     const {
       id: platformId,
       auth: { accessToken }
     } = userPlatformData;
-    const success = await this.eventsService.sendEventAnnouncement(data, {
+    const result = await this.eventsService.sendEventMessage(data, {
       accessToken,
       platformId
     });
-    return formatedHttpResponse({ success });
+    if (!result) {
+      return formatedHttpResponse({ success: false });
+    }
+    return formatedHttpResponse({ success: true, data: result });
   }
 }

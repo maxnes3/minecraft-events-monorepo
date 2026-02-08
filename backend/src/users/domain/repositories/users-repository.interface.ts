@@ -31,4 +31,9 @@ export interface IUsersRepository {
     platformName: string,
     authData: UserPlatformAuthData
   ): Promise<UserEntity | null>;
+  updatePlatformPropertiesAtUser(
+    userId: string,
+    platformName: string,
+    properties: Record<string, any>
+  ): Promise<UserEntity | null>;
 }

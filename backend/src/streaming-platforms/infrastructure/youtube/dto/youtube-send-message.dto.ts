@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IChatAnnouncementDTO } from '@/streaming-platforms/domain/interfaces/streaming-platform-chat-announcement.interface';
+import { IStreamingPlatformSendMessageDTO } from '@app/streaming-platforms/domain/interfaces/streaming-platform-send-message.interface';
 
-export class YoutubeChatAnnouncementDTO implements IChatAnnouncementDTO {
+export class YoutubeSendMessageDTO implements IStreamingPlatformSendMessageDTO {
   @ApiProperty({
     description: 'Announcement message content',
     required: true,

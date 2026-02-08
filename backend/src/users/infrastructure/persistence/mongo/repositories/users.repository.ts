@@ -1,13 +1,13 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUsersRepository } from '@/users/domain/repositories/users-repository.interface';
+import { IUsersRepository } from '@app/users/domain/repositories/users-repository.interface';
 import {
   UserEntity,
   UserPlatformAuthData,
   UserPlatformData
-} from '@/users/domain/entities/user.entity';
+} from '@app/users/domain/entities/user.entity';
 import { User, UserDocument } from '../schemas/user.schema';
-import { UserMapper } from '../../mappers/user.mapper';
+import { UserMapper } from '../mappers/user.mapper';
 
 export class UsersRepository implements IUsersRepository {
   constructor(
@@ -50,11 +50,11 @@ export class UsersRepository implements IUsersRepository {
   }
 
   public async delete(id: string): Promise<void> {
-    await this.userModel.findByIdAndDelete(id).exec();
+    await this.userModel.deleteOne({ _id: id }).exec();
   }
 
   public async existsById(id: string): Promise<boolean> {
-    const count = await this.userModel.countDocuments({ id }).exec();
+    const count = await this.userModel.countDocuments({ _id: id }).exec();
     return count > 0;
   }
 
@@ -121,6 +121,31 @@ export class UsersRepository implements IUsersRepository {
         {
           $set: {
             'platforms.$.auth': authData,
+            updatedAt: new Date()
+          }
+        },
+        {
+          new: true
+        }
+      )
+      .exec();
+    return this.mapper.toDomain(document);
+  }
+
+  public async updatePlatformPropertiesAtUser(
+    userId: string,
+    platformName: string,
+    properties: Record<string, any>
+  ): Promise<UserEntity | null> {
+    const document = await this.userModel
+      .findOneAndUpdate(
+        {
+          _id: userId,
+          'platforms.name': platformName
+        },
+        {
+          $set: {
+            'platforms.$.properties': properties,
             updatedAt: new Date()
           }
         },

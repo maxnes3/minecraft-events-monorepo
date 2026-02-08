@@ -1,10 +1,10 @@
-import { IEventsRepository } from '@/events/domain/repositories/events-repository.interface';
+import { IEventsRepository } from '@app/events/domain/repositories/events-repository.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event, EventDocument } from '../schemas/event.schema';
-import { EventEntity } from '@/events/domain/entities/event.entity';
-import { EventMapper } from '../../mappers/event.mapper';
-import { EventStatus } from '@/events/domain/entities/events.enums';
+import { EventEntity } from '@app/events/domain/entities/event.entity';
+import { EventMapper } from '../mappers/event.mapper';
+import { EventStatus } from '@app/events/domain/events.enums';
 
 export class EventsRepository implements IEventsRepository {
   constructor(
@@ -17,8 +17,18 @@ export class EventsRepository implements IEventsRepository {
     return this.mapper.toDomain(document);
   }
 
-  public async findByUserId(userId: string): Promise<EventEntity[]> {
-    const documents = await this.eventModel.find({ owner: userId }).exec();
+  public async findByOwnerId(owner: string): Promise<EventEntity[]> {
+    const documents = await this.eventModel.find({ owner }).exec();
+    return documents
+      .map((doc) => this.mapper.toDomain(doc))
+      .filter((doc) => doc !== null);
+  }
+
+  public async findByOwnerIdAndGame(
+    owner: string,
+    game: string
+  ): Promise<EventEntity[]> {
+    const documents = await this.eventModel.find({ owner, game }).exec();
     return documents
       .map((doc) => this.mapper.toDomain(doc))
       .filter((doc) => doc !== null);

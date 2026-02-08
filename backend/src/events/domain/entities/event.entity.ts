@@ -1,12 +1,14 @@
 import { Types } from 'mongoose';
-import { EventDTO } from '@/events/application/dto/event.dto';
-import { EventStatus } from './events.enums';
+import { EventDTO } from '@app/events/application/dto/event.dto';
+import { EventQuality, EventStatus } from '../events.enums';
 
 export class EventEntity {
   constructor(
     private readonly _id: string,
     private readonly owner: string,
     private name: string,
+    private readonly game: string,
+    private quality: EventQuality,
     private duration: number,
     private status: EventStatus,
     private createdAt: Date = new Date(),
@@ -16,17 +18,21 @@ export class EventEntity {
   public static create(
     owner: string,
     name: string,
+    game: string,
+    quality: EventQuality = EventQuality.REGULAR,
     duration: number,
     status: EventStatus = EventStatus.READY
   ): EventEntity {
     const id = new Types.ObjectId().toString();
-    return new EventEntity(id, owner, name, duration, status);
+    return new EventEntity(id, owner, name, game, quality, duration, status);
   }
 
   public static restore(
     id: string,
     owner: string,
     name: string,
+    game: string,
+    quality: EventQuality,
     duration: number,
     status: EventStatus,
     createdAt?: Date,
@@ -36,6 +42,8 @@ export class EventEntity {
       id,
       owner,
       name,
+      game,
+      quality,
       duration,
       status,
       createdAt || new Date(),
@@ -48,6 +56,8 @@ export class EventEntity {
       _id: this._id,
       owner: this.owner,
       name: this.name,
+      game: this.game,
+      quality: this.quality,
       duration: this.duration,
       status: this.status,
       createdAt: this.createdAt.toDateString(),
@@ -57,6 +67,11 @@ export class EventEntity {
 
   public setName(name: string) {
     this.name = name;
+    this.updatedAt = new Date();
+  }
+
+  public setQuality(quality: EventQuality) {
+    this.quality = quality;
     this.updatedAt = new Date();
   }
 
@@ -80,6 +95,14 @@ export class EventEntity {
 
   public getName() {
     return this.name;
+  }
+
+  public getGame() {
+    return this.game;
+  }
+
+  public getQuality() {
+    return this.quality;
   }
 
   public getDuration() {

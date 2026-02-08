@@ -1,11 +1,16 @@
-# Streaming Events — Backend
+# 🛠️ Streaming Events — Backend
+
+![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)
+![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 
 Brief description
 - Backend for the Streaming Events project: API and integrations (Twitch, etc.).
 - Built with Node.js + NestJS, package manager — pnpm.
 
 Requirements
-- macOS
 - Docker & Docker Compose
 - Node.js 22 (for local development)
 - pnpm

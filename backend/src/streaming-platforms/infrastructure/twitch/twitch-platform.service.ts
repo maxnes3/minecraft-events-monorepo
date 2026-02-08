@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AuthService } from '@/auth';
-import { UsersService } from '@/users';
-import { LoggerService } from '@/shared/logger';
-import { HttpClient, HttpRequestConfig } from '@/shared/http';
-import { publicRuntimeConfig } from '@/shared/config';
+import { AuthService } from '@app/auth';
+import { UsersService } from '@app/users';
+import { LoggerService } from '@app/shared/logger';
+import { HttpClient, HttpRequestConfig } from '@app/shared/http';
+import { publicRuntimeConfig } from '@app/shared/config';
 import { TwitchApiUserTokensDTO } from './dto/twitch-api-user-token.dto';
 import { TwitchApiUserResponse } from './dto/twitch-api-user.dto';
-import { TwitchChatAnnouncementDTO } from './dto/twitch-chat-announcment.request';
+import { TwitchSendMessageDTO } from './dto/twitch-send-message.dto';
 import { IStreamingPlatformService } from '../../domain/interfaces/streaming-platform-service.interface';
 import { TwitchMapper } from './mappers/twitch.mappers';
-import { StreamingPlatformTokensDTO } from '@/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
-import { StreamingPlaftormUserDTO } from '@/streaming-platforms/domain/dto/streaming-platform-user.dto';
-import { StreamingPlatformAuthDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth.dto';
-import { StreamingPlatformAuthRequestDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
+import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { StreamingPlatformAuthDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth.dto';
+import { StreamingPlatformAuthRequestDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
+import { TwitchApiStreamResponse } from './dto/twitch-api-stream.dto';
+import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 
 @Injectable()
 export class TwitchPlatformService implements IStreamingPlatformService {
@@ -38,11 +40,14 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     this.logger.setContext(TwitchPlatformService.name);
   }
 
-  public getAuthUrl(redirectUrl?: string): string {
+  public getAuthUrl(isClient?: boolean): string {
     const authUrl = new URL(`${this.idUrl}/oauth2/authorize`);
+    const redirectUri = isClient
+      ? publicRuntimeConfig.client.url
+      : this.redirectUrl;
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: redirectUrl || this.redirectUrl,
+      redirect_uri: redirectUri,
       response_type: 'code',
       force_verify: 'true',
       scope: publicRuntimeConfig.twitch.authScopes.join(' ')
@@ -76,7 +81,6 @@ export class TwitchPlatformService implements IStreamingPlatformService {
         params.toString(),
         config
       );
-      this.logger.debug(`User token data: ${JSON.stringify(response.data)}`);
       return this.twitchMapper.toStreamingPlatformTokensDTO(response.data);
     } catch (error) {
       this.logger.error('Failed to exchange code for token', error);
@@ -161,9 +165,6 @@ export class TwitchPlatformService implements IStreamingPlatformService {
         params.toString(),
         config
       );
-      this.logger.debug(
-        `Refreshed token data: ${JSON.stringify(response.data)}`
-      );
       return this.twitchMapper.toStreamingPlatformTokensDTO(response.data);
     } catch (error) {
       this.logger.error('Failed to refresh user token', error);
@@ -188,7 +189,6 @@ export class TwitchPlatformService implements IStreamingPlatformService {
         userUrl,
         config
       );
-      this.logger.debug(`User data: ${JSON.stringify(response.data)}`);
       return this.twitchMapper.toStreamingPlatformUserDTO(
         response.data.data[0]
       );
@@ -225,11 +225,52 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     };
   }
 
-  public async sendChatAnnouncement(
-    data: TwitchChatAnnouncementDTO,
+  public async getStreamInLive(
+    authData: StreamingPlatformAuthRequestDTO
+  ): Promise<StreamingPlaftormStreamDTO | null> {
+    if (!authData.platformId) {
+      return null;
+    }
+
+    const streamInLiveUrl = `${this.apiUrl}/helix/streams`;
+    const params = {
+      user_id: authData.platformId,
+      type: 'live'
+    };
+    const config: HttpRequestConfig = {
+      headers: {
+        Authorization: `Bearer ${authData.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      params
+    };
+
+    this.logger.debug('Fetching Twitch stream in live information');
+    try {
+      const response = await this.httpClient.get<TwitchApiStreamResponse>(
+        streamInLiveUrl,
+        config
+      );
+      if (!response.data || response.data.data.length === 0) {
+        this.logger.error('No streams data found in Twitch API response');
+        return null;
+      }
+
+      return this.twitchMapper.toStreamingPlatformStreamDTO(
+        response.data.data[0]
+      );
+    } catch (error) {
+      this.logger.error('Failed to fetch Twitch streams information', error);
+      throw new Error(`Failed to get Twitch streams: ${error}`);
+    }
+  }
+
+  public async sendMessage(
+    data: TwitchSendMessageDTO,
     authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
     if (!authData.platformId) {
+      this.logger.error(`Not found platformId in AuthData`);
       return false;
     }
 
