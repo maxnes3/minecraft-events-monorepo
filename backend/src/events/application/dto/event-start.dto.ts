@@ -1,4 +1,4 @@
-import { publicRuntimeConfig } from '@/shared/config';
+import { publicRuntimeConfig } from '@app/shared/config';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EventStartDTO {

@@ -2,9 +2,9 @@ import { Controller, Delete, Get, HttpCode, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from '../application/users.service';
 import { UserUpdatePreferencesDTO } from '../application/dto/user-update-preferences.dto';
-import { formatedHttpResponse } from '@/shared/http';
-import { publicRuntimeConfig } from '@/shared/config';
-import { AuthUser } from '@/auth';
+import { formatedHttpResponse } from '@app/shared/http';
+import { publicRuntimeConfig } from '@app/shared/config';
+import { AuthUser } from '@app/auth';
 import { UserPresentationMapper } from './mappers/users-presentation.mapper';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)

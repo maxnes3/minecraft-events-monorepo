@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AuthService } from '@/auth';
-import { UsersService } from '@/users';
-import { LoggerService } from '@/shared/logger';
-import { publicRuntimeConfig } from '@/shared/config';
+import { AuthService } from '@app/auth';
+import { UsersService } from '@app/users';
+import { LoggerService } from '@app/shared/logger';
+import { publicRuntimeConfig } from '@app/shared/config';
 import { YoutubeApiUserTokensDTO } from './dto/youtube-api-user-tokens.dto';
-import { HttpClient, HttpRequestConfig } from '@/shared/http';
+import { HttpClient, HttpRequestConfig } from '@app/shared/http';
 import { YoutubeMapper } from './mappers/youtube.mappers';
 import { YoutubeApiUserResponse } from './dto/youtube-api-user.dto';
-import { YoutubeSendChatAnnouncementDTO } from './dto/youtube-send-chat-announcement.dto';
-import { StreamingPlatformTokensDTO } from '@/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
-import { StreamingPlaftormUserDTO } from '@/streaming-platforms/domain/dto/streaming-platform-user.dto';
-import { IStreamingPlatformService } from '@/streaming-platforms/domain/interfaces/streaming-platform-service.interface';
+import { YoutubeSendMessageDTO } from './dto/youtube-send-message.dto';
+import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { IStreamingPlatformService } from '@app/streaming-platforms/domain/interfaces/streaming-platform-service.interface';
 import { YoutubeApiStreamResponse } from './dto/youtube-api-stream.dto';
-import { StreamingPlatformAuthDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth.dto';
-import { StreamingPlatformAuthRequestDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
-import { StreamingPlaftormStreamDTO } from '@/streaming-platforms/domain/dto/streaming-platform-stream.dto';
+import { StreamingPlatformAuthDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth.dto';
+import { StreamingPlatformAuthRequestDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
+import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 
 @Injectable()
 export class YoutubePlatformService implements IStreamingPlatformService {
@@ -275,14 +275,15 @@ export class YoutubePlatformService implements IStreamingPlatformService {
     }
   }
 
-  public async sendChatAnnouncement(
-    data: YoutubeSendChatAnnouncementDTO,
+  public async sendMessage(
+    data: YoutubeSendMessageDTO,
     authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
     if (
       !authData.platformProperties ||
       !authData.platformProperties['liveChatId']
     ) {
+      this.logger.error(`Not found liveChatId in AuthData Properties`);
       return false;
     }
 

@@ -1,4 +1,4 @@
-import { EventQuality, EventStatus } from '@/events/domain/events.enums';
+import { EventQuality, EventStatus } from '@app/events/domain/events.enums';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EventPresentationDTO {

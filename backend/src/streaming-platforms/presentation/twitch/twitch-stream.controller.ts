@@ -1,9 +1,9 @@
 import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { LoggerService } from '@/shared/logger';
-import { TwitchSendChatAnnouncementDTO } from '../../infrastructure/twitch/dto/twitch-send-chat-announcment.dto';
+import { LoggerService } from '@app/shared/logger';
+import { TwitchSendMessageDTO } from '../../infrastructure/twitch/dto/twitch-send-message.dto';
 import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
-import { formatedHttpResponse } from '@/shared/http';
+import { formatedHttpResponse } from '@app/shared/http';
 
 @ApiTags('Twitch Stream')
 @Controller('twitch/stream')
@@ -26,15 +26,15 @@ export class TwitchStreamController {
     return formatedHttpResponse({ success: true, data: stream });
   }
 
-  @ApiOperation({ summary: 'Send a chat announcement to Twitch channel' })
-  @Post('send/announcement')
+  @ApiOperation({ summary: 'Send a chat message to Twitch channel' })
+  @Post('send/message')
   @HttpCode(200)
   public async sendChatAnnouncement(
     @Query('access_token') accessToken: string,
     @Query('broadcaster_id') broadcasterId: string,
-    @Body() data: TwitchSendChatAnnouncementDTO
+    @Body() data: TwitchSendMessageDTO
   ) {
-    const success = await this.twitchService.sendChatAnnouncement(data, {
+    const success = await this.twitchService.sendMessage(data, {
       accessToken,
       platformId: broadcasterId
     });

@@ -1,4 +1,4 @@
-import { IStreamingPlatformSendChatAnnouncementDTO } from './streaming-platform-chat-announcement.interface';
+import { IStreamingPlatformSendMessageDTO } from './streaming-platform-send-message.interface';
 import { StreamingPlatformTokensDTO } from '../dto/streaming-platform-tokens.dto';
 import { StreamingPlaftormUserDTO } from '../dto/streaming-platform-user.dto';
 import { StreamingPlatformAuthRequestDTO } from '../dto/streaming-platform-auth-request.dto';
@@ -18,8 +18,8 @@ export interface IStreamingPlatformService {
   getStreamInLive(
     authData: StreamingPlatformAuthRequestDTO
   ): Promise<StreamingPlaftormStreamDTO | null>;
-  sendChatAnnouncement(
-    data: IStreamingPlatformSendChatAnnouncementDTO,
+  sendMessage(
+    data: IStreamingPlatformSendMessageDTO,
     authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean>;
 }

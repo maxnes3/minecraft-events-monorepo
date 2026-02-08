@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
-import { UserDTO } from '@/users/application/dto/user.dto';
-import { publicRuntimeConfig } from '@/shared/config';
+import { UserDTO } from '@app/users/application/dto/user.dto';
+import { publicRuntimeConfig } from '@app/shared/config';
 
 export class UserPlatformAuthData {
   accessToken: string;

@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AuthService } from '@/auth';
-import { UsersService } from '@/users';
-import { LoggerService } from '@/shared/logger';
-import { HttpClient, HttpRequestConfig } from '@/shared/http';
-import { publicRuntimeConfig } from '@/shared/config';
+import { AuthService } from '@app/auth';
+import { UsersService } from '@app/users';
+import { LoggerService } from '@app/shared/logger';
+import { HttpClient, HttpRequestConfig } from '@app/shared/http';
+import { publicRuntimeConfig } from '@app/shared/config';
 import { TwitchApiUserTokensDTO } from './dto/twitch-api-user-token.dto';
 import { TwitchApiUserResponse } from './dto/twitch-api-user.dto';
-import { TwitchSendChatAnnouncementDTO } from './dto/twitch-send-chat-announcment.dto';
+import { TwitchSendMessageDTO } from './dto/twitch-send-message.dto';
 import { IStreamingPlatformService } from '../../domain/interfaces/streaming-platform-service.interface';
 import { TwitchMapper } from './mappers/twitch.mappers';
-import { StreamingPlatformTokensDTO } from '@/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
-import { StreamingPlaftormUserDTO } from '@/streaming-platforms/domain/dto/streaming-platform-user.dto';
-import { StreamingPlatformAuthDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth.dto';
-import { StreamingPlatformAuthRequestDTO } from '@/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
+import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { StreamingPlatformAuthDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth.dto';
+import { StreamingPlatformAuthRequestDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
 import { TwitchApiStreamResponse } from './dto/twitch-api-stream.dto';
-import { StreamingPlaftormStreamDTO } from '@/streaming-platforms/domain/dto/streaming-platform-stream.dto';
+import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 
 @Injectable()
 export class TwitchPlatformService implements IStreamingPlatformService {
@@ -265,11 +265,12 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     }
   }
 
-  public async sendChatAnnouncement(
-    data: TwitchSendChatAnnouncementDTO,
+  public async sendMessage(
+    data: TwitchSendMessageDTO,
     authData: StreamingPlatformAuthRequestDTO
   ): Promise<boolean> {
     if (!authData.platformId) {
+      this.logger.error(`Not found platformId in AuthData`);
       return false;
     }
 

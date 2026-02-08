@@ -7,7 +7,7 @@ import {
   User,
   UserSchema
 } from './infrastructure/persistence/mongo/schemas/user.schema';
-import { UserMapper } from './infrastructure/persistence/mappers/user.mapper';
+import { UserMapper } from './infrastructure/persistence/mongo/mappers/user.mapper';
 import { UsersRepository } from './infrastructure/persistence/mongo/repositories/users.repository';
 import { UserPresentationMapper } from './presentation/mappers/users-presentation.mapper';
 

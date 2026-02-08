@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TwitchAnnouncementColor } from './twitch.enums';
-import { IStreamingPlatformSendChatAnnouncementDTO } from '@/streaming-platforms/domain/interfaces/streaming-platform-chat-announcement.interface';
+import { IStreamingPlatformSendMessageDTO } from '@app/streaming-platforms/domain/interfaces/streaming-platform-send-message.interface';
 
-export class TwitchSendChatAnnouncementDTO implements IStreamingPlatformSendChatAnnouncementDTO {
+export class TwitchSendMessageDTO implements IStreamingPlatformSendMessageDTO {
   @ApiProperty({
     description: 'Announcement message content',
     required: true,

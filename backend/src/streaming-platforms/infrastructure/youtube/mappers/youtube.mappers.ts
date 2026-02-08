@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { IStreamingPlatformMapper } from '@/streaming-platforms/domain/interfaces/streaming-platform-mapper.interface';
+import { IStreamingPlatformMapper } from '@app/streaming-platforms/domain/interfaces/streaming-platform-mapper.interface';
 import { YoutubeApiUserTokensDTO } from '../dto/youtube-api-user-tokens.dto';
 import { YoutubeApiUserDTO } from '../dto/youtube-api-user.dto';
-import { StreamingPlatformTokensDTO } from '@/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
-import { StreamingPlaftormUserDTO } from '@/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
 import { StreamingPlatforms } from '../../streaming-platforms.enums';
 import { YoutubeApiStreamDTO } from '../dto/youtube-api-stream.dto';
-import { StreamingPlaftormStreamDTO } from '@/streaming-platforms/domain/dto/streaming-platform-stream.dto';
+import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 
 @Injectable()
 export class YoutubeMapper implements IStreamingPlatformMapper {

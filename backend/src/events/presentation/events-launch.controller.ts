@@ -1,13 +1,13 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { formatedHttpResponse } from '@/shared/http';
+import { formatedHttpResponse } from '@app/shared/http';
 import { EventsService } from '../application/events.service';
-import { EventSendAnnouncementDTO } from '../application/dto/event-send-announcement.dto';
+import { EventSendMessageDTO } from '../application/dto/event-send-message.dto';
 import { EventCompleteDTO } from '../application/dto/event-complete.dto';
 import { EventStartDTO } from '../application/dto/event-start.dto';
-import { AuthUser } from '@/auth';
-import { UsersService } from '@/users';
-import { publicRuntimeConfig } from '@/shared/config';
+import { AuthUser } from '@app/auth';
+import { UsersService } from '@app/users';
+import { publicRuntimeConfig } from '@app/shared/config';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
 @ApiTags('Events Launch')
@@ -80,12 +80,12 @@ export class EventsLaunchController {
     return formatedHttpResponse({ success: true, data: result });
   }
 
-  @ApiOperation({ summary: 'Send event announcement' })
-  @Post('send/announcement')
+  @ApiOperation({ summary: 'Send event message at Platform' })
+  @Post('send/message')
   @HttpCode(200)
   public async sendEventAnnouncement(
     @AuthUser('sub') userId: string,
-    @Body() data: EventSendAnnouncementDTO
+    @Body() data: EventSendMessageDTO
   ) {
     const userPlatformData =
       await this.usersService.getPlatformDataByUserIdAndPlatformName(
@@ -100,7 +100,7 @@ export class EventsLaunchController {
       id: platformId,
       auth: { accessToken }
     } = userPlatformData;
-    const result = await this.eventsService.sendEventAnnouncement(data, {
+    const result = await this.eventsService.sendEventMessage(data, {
       accessToken,
       platformId
     });

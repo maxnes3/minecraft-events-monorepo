@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { TwitchApiUserTokensDTO } from '../dto/twitch-api-user-token.dto';
-import { IStreamingPlatformMapper } from '@/streaming-platforms/domain/interfaces/streaming-platform-mapper.interface';
+import { IStreamingPlatformMapper } from '@app/streaming-platforms/domain/interfaces/streaming-platform-mapper.interface';
 import { TwitchApiUserDTO } from '../dto/twitch-api-user.dto';
-import { StreamingPlaftormUserDTO } from '@/streaming-platforms/domain/dto/streaming-platform-user.dto';
-import { StreamingPlatformTokensDTO } from '@/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
 import { StreamingPlatforms } from '../../streaming-platforms.enums';
-import { StreamingPlaftormStreamDTO } from '@/streaming-platforms/domain/dto/streaming-platform-stream.dto';
+import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 import { TwitchApiStreamDTO } from '../dto/twitch-api-stream.dto';
 
 @Injectable()

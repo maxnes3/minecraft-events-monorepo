@@ -1,5 +1,5 @@
-import { AuthTokensFromHeadersDTO } from '@/auth/domain/dto/auth-tokens-from-headers.dto';
-import { normalizeHttpRequestHeaders } from '@/shared/http';
+import { AuthTokensFromHeadersDTO } from '@app/auth/domain/dto/auth-tokens-from-headers.dto';
+import { normalizeHttpRequestHeaders } from '@app/shared/http';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
 

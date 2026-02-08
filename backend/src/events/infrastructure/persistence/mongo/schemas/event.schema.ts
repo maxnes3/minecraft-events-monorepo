@@ -1,4 +1,4 @@
-import { EventQuality, EventStatus } from '@/events/domain/events.enums';
+import { EventQuality, EventStatus } from '@app/events/domain/events.enums';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 

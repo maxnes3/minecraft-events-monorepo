@@ -1,9 +1,9 @@
 import { Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
 import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { publicRuntimeConfig } from '@/shared/config';
-import { formatedHttpResponse } from '@/shared/http';
-import { Public } from '@/auth';
+import { publicRuntimeConfig } from '@app/shared/config';
+import { formatedHttpResponse } from '@app/shared/http';
+import { Public } from '@app/auth';
 import type { Response } from 'express';
 
 @ApiTags('Twitch Auth')

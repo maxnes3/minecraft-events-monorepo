@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class EventSendAnnouncementDTO {
+export class EventSendMessageDTO {
   @ApiProperty({
     description: 'Message to be announced',
     required: true,

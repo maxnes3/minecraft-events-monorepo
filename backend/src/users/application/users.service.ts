@@ -1,4 +1,4 @@
-import { LoggerService } from '@/shared/logger';
+import { LoggerService } from '@app/shared/logger';
 import { Injectable } from '@nestjs/common';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { UserDTO } from './dto/user.dto';

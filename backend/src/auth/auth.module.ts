@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './application/auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { publicRuntimeConfig } from '@/shared/config';
+import { publicRuntimeConfig } from '@app/shared/config';
 import { AuthGuard } from './presentation/guards/auth.guard';
 import { AuthController } from './presentation/controllers/auth.controller';
 

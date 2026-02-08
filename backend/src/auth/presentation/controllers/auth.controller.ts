@@ -1,9 +1,9 @@
-import { AuthService } from '@/auth/application/auth.service';
+import { AuthService } from '@app/auth/application/auth.service';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../decorators/public.decorator';
-import { AuthRefreshTokensDTO } from '@/auth/application/dto/auth-refresh-tokens.dto';
-import { formatedHttpResponse } from '@/shared/http';
+import { AuthRefreshTokensDTO } from '@app/auth/application/dto/auth-refresh-tokens.dto';
+import { formatedHttpResponse } from '@app/shared/http';
 
 @ApiTags('Auth')
 @Controller('auth')

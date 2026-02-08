@@ -2,10 +2,10 @@ import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EventsVotingStartDTO } from '../application/dto/events-voting-start.dto';
 import { EventsService } from '../application/events.service';
-import { UsersService } from '@/users';
-import { AuthUser } from '@/auth';
-import { formatedHttpResponse } from '@/shared/http';
-import { publicRuntimeConfig } from '@/shared/config';
+import { UsersService } from '@app/users';
+import { AuthUser } from '@app/auth';
+import { formatedHttpResponse } from '@app/shared/http';
+import { publicRuntimeConfig } from '@app/shared/config';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
 @ApiTags('Events Voting')

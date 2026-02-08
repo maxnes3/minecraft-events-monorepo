@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { I18nClient } from '@/shared/i18n';
-import { LoggerService } from '@/shared/logger';
-import { publicRuntimeConfig } from '@/shared/config';
+import { I18nClient } from '@app/shared/i18n';
+import { LoggerService } from '@app/shared/logger';
+import { publicRuntimeConfig } from '@app/shared/config';
 import {
   StreamingPlatforms,
   StreamingPlatformsFactory,
   type StreamingPlatformAuthRequestDTO
-} from '@/streaming-platforms';
-import { EventSendAnnouncementDTO } from './dto/event-send-announcement.dto';
+} from '@app/streaming-platforms';
+import { EventSendMessageDTO } from './dto/event-send-message.dto';
 import { EventStatus, EventsVotingStatus } from '../domain/events.enums';
-import { UsersService } from '@/users';
+import { UsersService } from '@app/users';
 import { EventDTO } from './dto/event.dto';
 import { EventCreateDTO } from './dto/event-create.dto';
 import { EventsRepository } from '../infrastructure/persistence/mongo/repositories/events.repository';
@@ -17,12 +17,12 @@ import { EventEntity } from '../domain/entities/event.entity';
 import { EventUpdateDTO } from './dto/event-update.dto';
 import { EventStartDTO } from './dto/event-start.dto';
 import { EventCompleteDTO } from './dto/event-complete.dto';
-import { EventAnnouncementResultDTO } from './dto/event-announcement-result.dto';
+import { EventMessageResultDTO } from './dto/event-message-result.dto';
 import { EventsVotingStartDTO } from './dto/events-voting-start.dto';
 import {
-  EVENT_STATUS_ANNOUNCEMENT_MESSAGES,
-  EVENTS_VOTING_ANNOUNCEMENT_MESSAGES
-} from './event-announcement-messages.constants';
+  EVENT_STATUS_MESSAGES,
+  EVENTS_VOTING_MESSAGES
+} from './event-messages.constants';
 
 @Injectable()
 export class EventsService {
@@ -130,7 +130,7 @@ export class EventsService {
     ownerId: string,
     data: EventsVotingStartDTO,
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<EventAnnouncementResultDTO | null> {
+  ): Promise<EventMessageResultDTO | null> {
     const events = await this.eventsRepository.findByOwnerIdAndGame(
       ownerId,
       data.game
@@ -142,12 +142,12 @@ export class EventsService {
       return null;
     }
 
-    const message = this.getAnnouncementMessage(
-      EVENTS_VOTING_ANNOUNCEMENT_MESSAGES[EventsVotingStatus.STARTED],
+    const message = this.getMessage(
+      EVENTS_VOTING_MESSAGES[EventsVotingStatus.STARTED],
       {},
       data.lang
     );
-    const result = await this.sendEventAnnouncement(
+    const result = await this.sendEventMessage(
       {
         message,
         platform: data.platform
@@ -160,7 +160,7 @@ export class EventsService {
   public async startEvent(
     data: EventStartDTO,
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<EventAnnouncementResultDTO | null> {
+  ): Promise<EventMessageResultDTO | null> {
     const exists = await this.eventsRepository.existsById(data.eventId);
     if (!exists) {
       this.logger.error(`Event with ID ${data.eventId} not found`);
@@ -172,12 +172,12 @@ export class EventsService {
       EventStatus.STARTED
     );
 
-    const message = this.getAnnouncementMessage(
-      EVENT_STATUS_ANNOUNCEMENT_MESSAGES[EventStatus.STARTED],
+    const message = this.getMessage(
+      EVENT_STATUS_MESSAGES[EventStatus.STARTED],
       {},
       data.lang
     );
-    const result = await this.sendEventAnnouncement(
+    const result = await this.sendEventMessage(
       { message, platform: data.platform },
       authData
     );
@@ -187,7 +187,7 @@ export class EventsService {
   public async completeEvent(
     data: EventCompleteDTO,
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<EventAnnouncementResultDTO | null> {
+  ): Promise<EventMessageResultDTO | null> {
     const event = await this.eventsRepository.findById(data.eventId);
     if (!event) {
       this.logger.error(`Event with ID ${data.eventId} not found`);
@@ -199,12 +199,12 @@ export class EventsService {
       EventStatus.COMPLETED
     );
 
-    const message = this.getAnnouncementMessage(
-      EVENT_STATUS_ANNOUNCEMENT_MESSAGES[EventStatus.COMPLETED],
+    const message = this.getMessage(
+      EVENT_STATUS_MESSAGES[EventStatus.COMPLETED],
       {},
       data.lang
     );
-    const result = await this.sendEventAnnouncement(
+    const result = await this.sendEventMessage(
       {
         message,
         platform: data.platform
@@ -214,15 +214,15 @@ export class EventsService {
     return result;
   }
 
-  public async sendEventAnnouncement(
-    data: EventSendAnnouncementDTO,
+  public async sendEventMessage(
+    data: EventSendMessageDTO,
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<EventAnnouncementResultDTO | null> {
+  ): Promise<EventMessageResultDTO | null> {
     try {
       const platform = data.platform as StreamingPlatforms;
       const response = await this.streamingFactory
         .getService(platform)
-        .sendChatAnnouncement({ message: data.message }, authData);
+        .sendMessage({ message: data.message }, authData);
       if (!response) {
         this.logger.error(
           `Failed to send event announcement on ${platform} platform`
@@ -250,12 +250,14 @@ export class EventsService {
     return true;
   }
 
-  private getAnnouncementMessage(
+  private getMessage(
     tKey: string,
-    { ...args },
+    args: Record<string, any> = {},
     lang: string = publicRuntimeConfig.i18n.fallbackLanguage
   ): string {
-    const translateData = { lang, ...args };
-    return this.i18nClient.translate(tKey, translateData);
+    return this.i18nClient.translate(tKey, {
+      lang,
+      args
+    });
   }
 }

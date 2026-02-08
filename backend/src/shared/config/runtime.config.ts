@@ -3,7 +3,8 @@ export const publicRuntimeConfig = {
     env: process.env.NESTJS_APPLICATION_ENV || '',
     version: process.env.NESTJS_APPLICATION_VERSION || '1.0.0',
     port: process.env.NESTJS_APPLICATION_PORT || 3000,
-    apiPrefix: process.env.NESTJS_APPLICATION_API_PREFIX || 'api/v1'
+    apiPrefix: process.env.NESTJS_APPLICATION_API_PREFIX || 'api/v1',
+    name: process.env.NESTJS_APPLICATION_NAME || 'Streaming Events App'
   },
   jwt: {
     secret: process.env.NESTJS_JWT_SECRET || '',

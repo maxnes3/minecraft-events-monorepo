@@ -17,12 +17,12 @@ import {
   ApiQuery,
   ApiTags
 } from '@nestjs/swagger';
-import { formatedHttpResponse } from '@/shared/http';
+import { formatedHttpResponse } from '@app/shared/http';
 import { EventsService } from '../application/events.service';
 import { EventCreateDTO } from '../application/dto/event-create.dto';
 import { EventUpdateDTO } from '../application/dto/event-update.dto';
-import { publicRuntimeConfig } from '@/shared/config';
-import { AuthUser } from '@/auth';
+import { publicRuntimeConfig } from '@app/shared/config';
+import { AuthUser } from '@app/auth';
 import { EventPresentationMapper } from './mappers/event-presentation.mapper';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)

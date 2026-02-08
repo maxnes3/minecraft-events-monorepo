@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { EventDTO } from '@/events/application/dto/event.dto';
+import { EventDTO } from '@app/events/application/dto/event.dto';
 import { EventQuality, EventStatus } from '../events.enums';
 
 export class EventEntity {

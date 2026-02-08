@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EventQuality } from '@/events/domain/events.enums';
+import { EventQuality } from '@app/events/domain/events.enums';
 
 export class EventCreateDTO {
   @ApiProperty({

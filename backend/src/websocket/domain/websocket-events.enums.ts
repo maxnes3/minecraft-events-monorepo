@@ -1,4 +1,12 @@
-export enum WebSocketEvents {
+export enum WebSocketPublishEvents {
   CONNECTED = 'connected',
-  ERROR = 'error'
+  DISCONNECTED = 'disconnected',
+  ERROR = 'error',
+  RESPONSE = 'response'
+}
+
+export enum WebSocketSubscribeEvents {
+  STREAMING_PLATFORM_INIT = 'streaming:platform:init',
+  STREAMING_PLATFORM_CLOSE = 'streaming:platform:close',
+  EVENTS_VOTING_START = 'events:voting:start'
 }

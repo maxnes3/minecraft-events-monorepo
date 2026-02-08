@@ -1,9 +1,9 @@
-import { publicRuntimeConfig } from '@/shared/config';
-import { formatedHttpResponse } from '@/shared/http';
-import { YoutubePlatformService } from '@/streaming-platforms/infrastructure/youtube/youtube-patform.service';
+import { publicRuntimeConfig } from '@app/shared/config';
+import { formatedHttpResponse } from '@app/shared/http';
+import { YoutubePlatformService } from '@app/streaming-platforms/infrastructure/youtube/youtube-patform.service';
 import { Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Public } from '@/auth';
+import { Public } from '@app/auth';
 import type { Response } from 'express';
 
 @ApiTags('Youtube Auth')

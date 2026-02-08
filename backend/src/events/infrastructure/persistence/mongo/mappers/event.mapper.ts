@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { EventDocument } from '../mongo/schemas/event.schema';
-import { EventEntity } from '@/events/domain/entities/event.entity';
+import { EventDocument } from '../schemas/event.schema';
+import { EventEntity } from '@app/events/domain/entities/event.entity';
 
 @Injectable()
 export class EventMapper {
