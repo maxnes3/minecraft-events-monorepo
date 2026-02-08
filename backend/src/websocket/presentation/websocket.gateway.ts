@@ -6,10 +6,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { WebSocketService } from '../application/websocket.service';
-import { publicRuntimeConfig } from '@app/shared/config';
 
 @NestWebSocketGateway({
-  namespace: publicRuntimeConfig.application.apiPrefix,
   cors: {
     origin: '*',
     credentials: true
