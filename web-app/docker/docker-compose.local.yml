@@ -1,0 +1,23 @@
+version: "3.8"
+
+name: streaming-events
+
+services:
+  web-app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: streaming-events-web-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - path: ./.env.common
+        required: true
+      - path: ./.env.local
+        required: true
+    volumes:
+      - ../:/app
+      - /app/node_modules
+    working_dir: /app
+    command: pnpm run dev
+    restart: unless-stopped

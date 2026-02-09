@@ -1,4 +1,4 @@
-# 🛠️ Streaming Events — Backend
+# 🍰 Streaming Events — Backend
 
 ![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)
 ![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
@@ -30,11 +30,11 @@ pnpm run start:dev
 ```
 
 Running in Docker (recommended for local environment)
-- Quick start (script):
+- Quick start (script) for MacOS | Linux:
 ```bash
 ./scripts/start-docker.sh
 ```
-Or
+Or Windows:
 ```powershell
 ./scripts/start-docker.bat
 ```
