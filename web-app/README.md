@@ -28,7 +28,7 @@ Running in Docker (recommended for local environment)
 ```bash
 ./scripts/start-docker.sh
 ```
-Or Windows:
+- Or Windows:
 ```powershell
 ./scripts/start-docker.bat
 ```
