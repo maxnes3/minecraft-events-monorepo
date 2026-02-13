@@ -1,0 +1,16 @@
+@import "@app/shared/ui/styles/rem";
+
+.root {
+  display: flex;
+  flex-direction: row;
+  padding: rem(16px);
+  gap: rem(8px);
+}
+
+// .twitch {
+//   background-color: var(--str-twitch-color);
+// }
+
+// .youtube {
+//   background-color: var(--str-youtube-color);
+// }

@@ -1,5 +1,9 @@
-import { publicRuntimeConfig } from '@app/shared/config';
+import { AuthRedirectToPlatforms } from '@app/features/auth-redirect-to-platforms';
 
 export default function Landing() {
-  return <div>{publicRuntimeConfig.application.name}</div>;
+  return (
+    <div>
+      <AuthRedirectToPlatforms />
+    </div>
+  );
 }

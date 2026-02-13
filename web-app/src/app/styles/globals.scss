@@ -1,0 +1,18 @@
+body {
+  margin: 0;
+
+  /* Fonts settings */
+  --str-font-primary:
+    Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* General vars */
+  --str-white-color: #ffffff;
+  --str-black-color: #000000;
+
+  /* Platforms vars */
+  --str-twitch-color: #9146ff;
+  --str-youtube-color: #ff0000;
+}

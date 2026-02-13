@@ -1,10 +1,8 @@
-import { publicRuntimeConfig } from '@app/shared/config';
 import { formatedHttpResponse } from '@app/shared/http';
 import { YoutubePlatformService } from '@app/streaming-platforms/infrastructure/youtube/youtube-patform.service';
-import { Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Public } from '@app/auth';
-import type { Response } from 'express';
 
 @ApiTags('Youtube Auth')
 @Controller('youtube/auth')
@@ -14,18 +12,21 @@ export class YoutubeAuthController {
 
   @ApiOperation({ summary: 'Redirect to Youtube authorization URL' })
   @ApiQuery({
-    name: 'is_client',
+    name: 'redirect_url',
     description: 'Redirect to Client URL after Youtube authorization',
-    type: Boolean,
+    type: String,
     required: false
   })
   @Get('redirect')
+  @HttpCode(200)
   public redirectToYoutubeAuth(
-    @Query('is_client') isClient: boolean | undefined,
-    @Res() response: Response
+    @Query('redirect_url') redirectUrl: string | undefined
   ) {
-    const authRedirectUrl = this.youtubeService.getAuthUrl(isClient);
-    response.redirect(authRedirectUrl);
+    const authRedirectUrl = this.youtubeService.getAuthUrl(redirectUrl);
+    return formatedHttpResponse({
+      success: true,
+      data: { url: authRedirectUrl }
+    });
   }
 
   @ApiOperation({ summary: 'Youtube authorization callback' })
@@ -36,17 +37,12 @@ export class YoutubeAuthController {
     description: 'Error code if failed'
   })
   @Get('callback')
+  @HttpCode(200)
   public async authCallback(
     @Query('code') code: string,
-    @Query('error') error: string | undefined,
-    @Query('is_client') isClient: boolean | undefined,
-    @Res() response: Response
+    @Query('error') error: string | undefined
   ) {
     if (error) {
-      if (!isClient) {
-        response.redirect(`/error?message=${encodeURIComponent(error)}`);
-        return;
-      }
       return formatedHttpResponse({ success: false, error });
     }
 
@@ -64,10 +60,6 @@ export class YoutubeAuthController {
       tokens,
       userData
     );
-    if (!isClient) {
-      response.redirect(`/${publicRuntimeConfig.application.apiPrefix}`);
-      return;
-    }
     return formatedHttpResponse({ success: true, data: authData });
   }
 

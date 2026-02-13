@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "src/shared/ui/hooks/useSearchParam.tsx"  ],
   "exclude": ["node_modules"]
 }

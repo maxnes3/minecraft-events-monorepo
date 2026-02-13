@@ -1,0 +1,11 @@
+@import "@app/shared/ui/styles/rem";
+
+.root {
+  padding: rem(8px);
+  border-radius: rem(8px);
+  border: none;
+  font-family: var(--str-font-primary);
+  font-weight: 600;
+  font-size: rem(16px);
+  cursor: pointer;
+}

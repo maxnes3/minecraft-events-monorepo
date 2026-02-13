@@ -42,14 +42,11 @@ export class YoutubePlatformService implements IStreamingPlatformService {
     this.logger.setContext(YoutubePlatformService.name);
   }
 
-  public getAuthUrl(isClient?: boolean): string {
+  public getAuthUrl(redirectUrl?: string): string {
     const authUrl = new URL(`${this.accountsUrl}/o/oauth2/v2/auth`);
-    const redirectUri = isClient
-      ? publicRuntimeConfig.client.url
-      : this.redirectUrl;
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: redirectUri,
+      redirect_uri: redirectUrl || this.redirectUrl,
       response_type: 'code',
       scope: publicRuntimeConfig.youtube.authScopes.join(' '),
       access_type: 'offline',

@@ -1,0 +1,21 @@
+@import "@app/shared/ui/styles/rem";
+
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: rem(6px);
+}
+
+.icon {
+  position: relative;
+  z-index: 2;
+}
+
+.label {
+  font-size: rem(26px);
+  font-weight: 700;
+  color: var(--str-black-color);
+}

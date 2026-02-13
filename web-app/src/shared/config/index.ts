@@ -1,1 +1,1 @@
-export * from './runtime.config';
+export * from './runtime';

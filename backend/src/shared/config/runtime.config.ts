@@ -1,4 +1,4 @@
-export const publicRuntimeConfig = {
+export const publicRuntimeConfig = Object.freeze({
   application: {
     env: process.env.NESTJS_APPLICATION_ENV || '',
     version: process.env.NESTJS_APPLICATION_VERSION || '1.0.0',
@@ -17,9 +17,6 @@ export const publicRuntimeConfig = {
     enabled: process.env.NESTJS_SWAGGER_ENABLED === 'true' || false,
     title: process.env.NESTJS_SWAGGER_TITLE || '',
     description: process.env.NESTJS_SWAGGER_DESCRIPTION || ''
-  },
-  client: {
-    url: process.env.NESTJS_CLIENT_URL || ''
   },
   i18n: {
     fallbackLanguage: process.env.NESTJS_I18N_FALLBACK_LANGUAGE || 'en',
@@ -47,4 +44,4 @@ export const publicRuntimeConfig = {
     redirectUrl: process.env.NESTJS_YOUTUBE_REDIRECT_URI || '',
     authScopes: process.env.NESTJS_YOUTUBE_AUTH_SCOPES?.split(',') || []
   }
-};
+});
