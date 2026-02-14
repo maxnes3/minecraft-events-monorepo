@@ -1,3 +1,26 @@
-.root {}
+@import "@app/shared/ui/styles/rem";
 
-.image {}
+.root {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: rem(16px);
+  gap: rem(12px);
+}
+
+.image {
+  border-radius: 50%;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.login {
+  margin: 0;
+}
+
+.platforms {
+  margin: 0;
+}

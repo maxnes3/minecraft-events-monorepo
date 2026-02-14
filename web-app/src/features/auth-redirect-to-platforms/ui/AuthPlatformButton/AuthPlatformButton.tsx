@@ -4,7 +4,7 @@ import { GetAuthRedirectUrlRequest } from '@app/entities/auth';
 import { PlatformAuthRedirectEndpointUrl } from '@app/shared/api';
 import { publicRuntimeConfig } from '@app/shared/config';
 import { Button } from '@app/shared/ui';
-import { ClientPageUrl } from '@app/shared/routes';
+import { UserPageUrl } from '@app/shared/routes';
 import styles from './AuthPlatformButton.module.scss';
 
 const DEFAULT_ICON_SIZE = 56;
@@ -26,7 +26,7 @@ const AuthPlatformButton: React.FC<Props> = ({
     }
 
     const redirectUrl = new URL(
-      `${publicRuntimeConfig.application.domain}${ClientPageUrl}`
+      `${publicRuntimeConfig.application.domain}${UserPageUrl}`
     );
     redirectUrl.searchParams.append('platform', platform);
     const url = PlatformAuthRedirectEndpointUrl(platform);

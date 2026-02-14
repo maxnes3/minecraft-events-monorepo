@@ -26,7 +26,7 @@ await i18next
     ns: [publicRuntimeConfig.i18n.defaultNamespace],
     lng: undefined,
     detection: {
-      order: ['cookie', 'navigator', 'path', 'htmlTag'],
+      order: ['cookie'],
       caches: ['cookie'],
       cookieName: publicRuntimeConfig.i18n.cookieName
     },

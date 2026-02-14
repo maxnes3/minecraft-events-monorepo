@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoggerService } from '@app/shared/logger';
+import { Response } from 'express';
 import { publicRuntimeConfig } from '@app/shared/config';
 import { AuthTokensDTO } from './dto/auth-tokens.dto';
 import { AuthTokenPayloadDTO } from '../domain/dto/auth-token-payload.dto';
@@ -10,6 +11,9 @@ export class AuthService {
   private readonly secret: string;
   private readonly expiresIn: number;
   private readonly refreshSecret: string;
+  private readonly refreshExpiresIn: number;
+  private readonly accessTokenCookieName: string;
+  private readonly refreshTokenCookieName: string;
 
   constructor(
     private readonly jwtService: JwtService,
@@ -18,6 +22,10 @@ export class AuthService {
     this.secret = publicRuntimeConfig.jwt.secret;
     this.expiresIn = publicRuntimeConfig.jwt.expiresIn;
     this.refreshSecret = publicRuntimeConfig.jwt.refreshSecret;
+    this.refreshExpiresIn = publicRuntimeConfig.jwt.refreshExpiresIn;
+    this.accessTokenCookieName = publicRuntimeConfig.jwt.accessTokenCookieName;
+    this.refreshTokenCookieName =
+      publicRuntimeConfig.jwt.refreshTokenCookieName;
 
     this.logger.setContext(AuthService.name);
   }
@@ -34,7 +42,7 @@ export class AuthService {
       { ...payload, type: 'refresh' },
       {
         secret: this.refreshSecret,
-        expiresIn: '7d'
+        expiresIn: this.refreshExpiresIn
       }
     );
 
@@ -43,6 +51,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       expiresIn: this.expiresIn,
+      refreshExpiresIn: this.refreshExpiresIn,
       obtainedAt: new Date().toISOString()
     };
   }
@@ -103,5 +112,35 @@ export class AuthService {
     } catch {
       return true;
     }
+  }
+
+  public insertTokensInResponse(response: Response, tokens: AuthTokensDTO) {
+    this.addCookieToResponse(
+      response,
+      this.accessTokenCookieName,
+      tokens.accessToken,
+      tokens.expiresIn * 1000
+    );
+    this.addCookieToResponse(
+      response,
+      this.refreshTokenCookieName,
+      tokens.refreshToken,
+      tokens.refreshExpiresIn * 1000
+    );
+  }
+
+  private addCookieToResponse(
+    response: Response,
+    cookie: string,
+    value: string,
+    expiresIn: number
+  ) {
+    response.cookie(cookie, value, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      maxAge: expiresIn
+    });
   }
 }

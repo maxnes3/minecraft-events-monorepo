@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import { normalizeHttpRequestCookies } from '@app/shared/http';
 import { AuthService } from '@app/auth/application/auth.service';
-import { AuthTokensFromHeadersDTO } from '@app/auth/domain/dto/auth-tokens-from-headers.dto';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { normalizeHttpRequestHeaders } from '@app/shared/http';
 import { AuthExtendedRequest } from '@app/auth/domain/interfaces/auth-extended-request.interface';
+import { AuthTokensDTO } from '@app/auth/domain/dto/auth-tokens.dto';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -28,9 +28,11 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthExtendedRequest>();
-    const headers = normalizeHttpRequestHeaders(request as unknown as Request);
+    // const headers = normalizeHttpRequestHeaders(request as unknown as Request); // For headers implementation
+    const cookies = normalizeHttpRequestCookies(request as unknown as Request); // For cookies implementation
 
-    const tokens = AuthTokensFromHeadersDTO.fromHeaders(headers);
+    // const tokens = AuthTokensFromHeadersDTO.fromHeaders(headers); // For headers implementation
+    const tokens = AuthTokensDTO.fromCookies(cookies); // For cookies implementation
     if (!tokens.accessToken) {
       throw new UnauthorizedException('Access token is required');
     }

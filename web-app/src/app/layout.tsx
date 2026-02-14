@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { Roboto } from 'next/font/google';
+import { FaviconStaticPath } from '@app/shared/ui/static';
 import { publicRuntimeConfig } from '@app/shared/config';
 import './styles/globals.scss';
 
@@ -22,14 +24,14 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: `${publicRuntimeConfig.static.icons}/favicon.svg`,
+        url: FaviconStaticPath,
         type: 'image/svg+xml'
       }
     ],
-    shortcut: `${publicRuntimeConfig.static.icons}/favicon.svg`,
+    shortcut: FaviconStaticPath,
     apple: [
       {
-        url: `${publicRuntimeConfig.static.icons}/favicon.svg`,
+        url: FaviconStaticPath,
         sizes: '180x180',
         type: 'image/svg+xml'
       }
@@ -37,13 +39,18 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const lang =
+    cookieStore.get(publicRuntimeConfig.i18n.cookieName)?.value ||
+    publicRuntimeConfig.i18n.fallbackLanguage;
+
   return (
-    <html lang="en" dir="ltr">
+    <html lang={lang} dir="ltr">
       <body className={font.className}>{children}</body>
     </html>
   );

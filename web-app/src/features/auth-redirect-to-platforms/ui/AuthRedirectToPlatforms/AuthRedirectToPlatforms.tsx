@@ -1,7 +1,7 @@
 'use client';
 
-import { publicRuntimeConfig } from '@app/shared/config';
 import { useTranslation } from '@app/shared/i18n';
+import { TwitchStaticPath, YoutubStaticPath } from '@app/shared/ui/static';
 import { AuthPlatformButton } from '../AuthPlatformButton';
 import styles from './AuthRedirectToPlatforms.module.scss';
 
@@ -13,12 +13,12 @@ const AuthRedirectToPlatforms = () => {
       <AuthPlatformButton
         platform="twitch"
         platformLabel={t('platforms.twitch_name')}
-        platformIconPath={`${publicRuntimeConfig.static.icons}/twitch.svg`}
+        platformIconPath={TwitchStaticPath}
       />
       <AuthPlatformButton
         platform="youtube"
         platformLabel={t('platforms.youtube_name')}
-        platformIconPath={`${publicRuntimeConfig.static.icons}/youtube.svg`}
+        platformIconPath={YoutubStaticPath}
       />
     </div>
   );

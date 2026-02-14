@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { AuthService } from '@app/auth';
+import { AuthService, AuthTokensDTO } from '@app/auth';
 import { UsersService } from '@app/users';
 import { LoggerService } from '@app/shared/logger';
 import { HttpClient, HttpRequestConfig } from '@app/shared/http';
+import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
+import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
+import { StreamingPlatformAuthRequestDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
+import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 import { publicRuntimeConfig } from '@app/shared/config';
+import { IStreamingPlatformService } from '@app/streaming-platforms/domain/interfaces/streaming-platform-service.interface';
 import { TwitchApiUserTokensDTO } from './dto/twitch-api-user-token.dto';
 import { TwitchApiUserResponse } from './dto/twitch-api-user.dto';
 import { TwitchSendMessageDTO } from './dto/twitch-send-message.dto';
-import { IStreamingPlatformService } from '../../domain/interfaces/streaming-platform-service.interface';
 import { TwitchMapper } from './mappers/twitch.mappers';
-import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
-import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
-import { StreamingPlatformAuthDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth.dto';
-import { StreamingPlatformAuthRequestDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
 import { TwitchApiStreamResponse } from './dto/twitch-api-stream.dto';
-import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
 
 @Injectable()
 export class TwitchPlatformService implements IStreamingPlatformService {
@@ -40,11 +39,11 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     this.logger.setContext(TwitchPlatformService.name);
   }
 
-  public getAuthUrl(redirectUrl?: string): string {
+  public getAuthUrl(): string {
     const authUrl = new URL(`${this.idUrl}/oauth2/authorize`);
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: redirectUrl || this.redirectUrl,
+      redirect_uri: this.redirectUrl,
       response_type: 'code',
       force_verify: 'true',
       scope: publicRuntimeConfig.twitch.authScopes.join(' ')
@@ -171,7 +170,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
   public async getUser(
     authData: StreamingPlatformAuthRequestDTO
-  ): Promise<StreamingPlaftormUserDTO> {
+  ): Promise<StreamingPlaftormUserDTO | null> {
     const userUrl = `${this.apiUrl}/helix/users`;
     const config: HttpRequestConfig = {
       headers: {
@@ -198,7 +197,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
   public async authUserByPlatform(
     tokens: StreamingPlatformTokensDTO,
     data: StreamingPlaftormUserDTO
-  ): Promise<StreamingPlatformAuthDTO | null> {
+  ): Promise<AuthTokensDTO | null> {
     const user = await this.usersService.upsertUserByPlatformAuth({
       name: data.platformName,
       id: data.platformId,
@@ -214,12 +213,7 @@ export class TwitchPlatformService implements IStreamingPlatformService {
 
     const userTokens = await this.authService.createToken(user._id);
     this.logger.debug(`User tokens: ${JSON.stringify(userTokens)}`);
-    return {
-      platformName: data.platformName,
-      login: data.platformLogin,
-      profileImgUrl: data.platformProfileImgUrl,
-      auth: userTokens
-    };
+    return userTokens;
   }
 
   public async getStreamInLive(

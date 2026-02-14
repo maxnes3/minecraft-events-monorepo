@@ -2,7 +2,7 @@ export const publicRuntimeConfig = Object.freeze({
   application: {
     env: process.env.NESTJS_APPLICATION_ENV || '',
     version: process.env.NESTJS_APPLICATION_VERSION || '1.0.0',
-    port: process.env.NESTJS_APPLICATION_PORT || 3000,
+    port: Number(process.env.NESTJS_APPLICATION_PORT) || 3000,
     apiPrefix: process.env.NESTJS_APPLICATION_API_PREFIX || 'api/v1',
     name: process.env.NESTJS_APPLICATION_NAME || 'Streaming Events App'
   },
@@ -10,8 +10,16 @@ export const publicRuntimeConfig = Object.freeze({
     secret: process.env.NESTJS_JWT_SECRET || '',
     expiresIn: Number(process.env.NESTJS_JWT_EXPIRES_IN) || 3600,
     refreshSecret: process.env.NESTJS_JWT_REFRESH_SECRET || '',
+    refreshExpiresIn:
+      Number(process.env.NESTJS_JWT_REFRESH_EXPIRES_IN) || 604800,
     authorizationHeader: process.env.NESTJS_AUTHORIZATION_HEADER || '',
-    refreshTokenHeader: process.env.NESTJS_REFRESH_TOKEN_HEADER || ''
+    refreshTokenHeader: process.env.NESTJS_REFRESH_TOKEN_HEADER || '',
+    accessTokenCookieName: process.env.NESTJS_ACCESS_TOKEN_COOKIE_NAME || '',
+    refreshTokenCookieName: process.env.NESTJS_REFRESH_TOKEN_COOKIE_NAME || ''
+  },
+  client: {
+    authUserRedirectUrl: process.env.NESTJS_CLIENT_AUTH_USER_REDIRECT_URL || '',
+    errorRedirectUrl: process.env.NESTJS_CLIENT_ERROR_REDIRECT_URL || ''
   },
   swagger: {
     enabled: process.env.NESTJS_SWAGGER_ENABLED === 'true' || false,

@@ -1,6 +1,17 @@
 {
+  "user": {
+    "profile_login_label": "Пользователь: {{loginName}}",
+    "profile_connected_platforms_label": "Платформы: [{{platformNames}}]"
+  },
   "platforms": {
     "twitch_name": "Twitch",
     "youtube_name": "Youtube"
+  },
+  "games": {
+    "connect_label": "Подключиться к игре!"
+  },
+  "errors": {
+    "unauthorized_message": "Ошибка авторизации!",
+    "unknown_message": "Неизвестная ошибка!"
   }
 }

@@ -3,4 +3,5 @@ import { type AuthUserState } from './auth-user.state';
 
 export interface AuthContextType {
   meState: BaseState<AuthUserState>;
+  onGetTokenForGameConnection: () => string | undefined;
 }
