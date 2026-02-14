@@ -1,4 +1,4 @@
-# 🏝️ Streaming Events — WebApp
+# 🐦‍🔥 Streaming Events — WebApp
 
 Brief description
 - Web Application for the Streaming Events project

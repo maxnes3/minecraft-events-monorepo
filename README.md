@@ -10,9 +10,9 @@
 
 Empower your community to participate in decision-making, event planning, and interactive experiences directly through chat commands and web interfaces.
 
-## [🍰 Docs for build up backend](./backend/README.md)
+## [🏰 Docs for build up backend](./backend/README.md)
 
-## [🏝️ Docs for build up web-app](./web-app/README.md)
+## [🐦‍🔥 Docs for build up web-app](./web-app/README.md)
 
 ### 🌟 Show Your Support
 ### If this project helps you engage your streaming community, please give it a ⭐️ on GitHub!
