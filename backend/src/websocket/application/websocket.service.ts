@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { AuthService } from '@app/auth';
 import { LoggerService } from '@app/shared/logger';
+import { UsersService } from '@app/users';
 import { WebSocketUserDTO } from './dto/websocket-user.dto';
 import { WebSocketHandshakeDTO } from './dto/websocket-handshake.dto';
 import {
@@ -23,7 +23,7 @@ export class WebSocketService {
   constructor(
     private readonly websocketEventsBusService: WebSocketEventsBusService,
     private readonly websocketSessionManager: WebSocketSessionManager,
-    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
     private readonly logger: LoggerService
   ) {
     this.logger.setContext(WebSocketService.name);
@@ -48,8 +48,8 @@ export class WebSocketService {
         return null;
       }
 
-      const payload = await this.authService.validateToken(token);
-      if (!payload || !payload.sub) {
+      const user = await this.usersService.getUserByGameConnectToken(token);
+      if (!user) {
         this.logger.warn(
           `Connection rejected: Invalid token for socket ${client.id}`
         );
@@ -66,15 +66,18 @@ export class WebSocketService {
         return null;
       }
 
-      const user: WebSocketUserDTO = {
-        userId: payload.sub,
+      const webSocketUser: WebSocketUserDTO = {
+        userId: user._id,
         socketId: client.id,
         platform,
         connectedAt: new Date()
       };
-      this.websocketSessionManager.insertUser(user.socketId, user);
+      this.websocketSessionManager.insertUser(
+        webSocketUser.socketId,
+        webSocketUser
+      );
       this.logger.debug(
-        `User ${user.userId} connected via socket ${client.id}`
+        `User ${webSocketUser.userId} connected via socket ${client.id}`
       );
 
       const result = await this.forwardToModule(
@@ -94,10 +97,10 @@ export class WebSocketService {
         WebSocketPublishEvents.CONNECTED,
         formatWsEmit({
           event: WebSocketPublishEvents.CONNECTED,
-          data: user
+          data: webSocketUser
         })
       );
-      return user;
+      return webSocketUser;
     } catch (error) {
       this.logger.error(`Connection failed for socket ${client.id}: ${error}`);
       client.emit(

@@ -1,6 +1,5 @@
 import { LoggerService } from '@app/shared/logger';
 import { Injectable } from '@nestjs/common';
-import { UserCreateDTO } from './dto/user-create.dto';
 import { UserDTO } from './dto/user.dto';
 import { UsersRepository } from '../infrastructure/persistence/mongo/repositories/users.repository';
 import { UserEntity } from '../domain/entities/user.entity';
@@ -8,11 +7,15 @@ import { UserConnectPlatformDTO } from './dto/user-connect-platform.dto';
 import { UserRemovePlatformDTO } from './dto/user-remove-platform.dto';
 import { UserPlatformDTO } from './dto/user-platform.dto';
 import { UserUpdatePreferencesDTO } from './dto/user-update-preferences.dto';
+import { UserGameConnectDTO } from './dto/user-game-connect.dto';
+import { CryptoService } from '../infrastructure/security/crypto.service';
+import { UserGameConnectToken } from '../domain/entities/user-game-connect-token.vo';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
+    private readonly cryptoService: CryptoService,
     private readonly logger: LoggerService
   ) {
     this.logger.setContext(UsersService.name);
@@ -29,21 +32,40 @@ export class UsersService {
     return user.toDTO();
   }
 
-  public async getUserByPlatformNameAndId(
-    platformName: string,
-    platformId: string
+  public async getUserByGameConnectToken(
+    token: string
   ): Promise<UserDTO | null> {
-    const user = await this.usersRepository.findByPlatformNameAndId(
-      platformName,
-      platformId
+    const gameConnectToken = new UserGameConnectToken(token);
+    const user = await this.usersRepository.findByGameConnectToken(
+      gameConnectToken.getHash()
     );
     if (!user) {
-      this.logger.error(`User with ${platformName} ID ${platformId} not found`);
+      this.logger.error(`User with GameConnectToken ${token} not found`);
       return null;
     }
 
-    this.logger.error(`User with ${platformName} ID ${platformId} is found`);
+    this.logger.debug(`User with GameConnectToken ${token} is found`);
     return user.toDTO();
+  }
+
+  public async getUserGameConnectToken(
+    userId: string
+  ): Promise<UserGameConnectDTO | null> {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.logger.error(`User with ID ${userId} not found`);
+      return null;
+    }
+
+    const gameConnectToken = UserGameConnectToken.generate();
+    await this.usersRepository.updateGameConnectTokenAtUser(
+      user.getId(),
+      gameConnectToken.getHash()
+    );
+
+    return {
+      token: gameConnectToken.getValue()
+    };
   }
 
   public async getPlatformDataByUserIdAndPlatformName(
@@ -64,27 +86,19 @@ export class UsersService {
       );
       return null;
     }
-    return platform;
-  }
 
-  public async createUser(data: UserCreateDTO): Promise<UserDTO | null> {
-    this.logger.debug(
-      `Creating user with connection: ${data.platformData.name}`
-    );
-    const exists = await this.usersRepository.existsByPlatformNameAndId(
-      data.platformData.name,
-      data.platformData.id
-    );
-    if (exists) {
-      this.logger.error(`User with ID ${data.platformData.id} already exists`);
-      return null;
-    }
-
-    const user = UserEntity.create([{ ...data.platformData }]);
-    await this.usersRepository.save(user);
-
-    this.logger.debug(`User created with ID: ${user.getId()}`);
-    return user.toDTO();
+    const decodedPlatformData: UserPlatformDTO = {
+      name: platform.name,
+      id: platform.id,
+      login: platform.login,
+      profileImgUrl: platform.profileImgUrl,
+      auth: {
+        expiresIn: platform.auth.expiresIn,
+        accessToken: this.cryptoService.decrypt(platform.auth.accessToken),
+        refreshToken: this.cryptoService.decrypt(platform.auth.refreshToken)
+      }
+    };
+    return decodedPlatformData;
   }
 
   public async updateUserPreferences(
@@ -156,20 +170,32 @@ export class UsersService {
   public async upsertUserByPlatformAuth(
     data: UserPlatformDTO
   ): Promise<UserDTO | null> {
+    const securityPlatformData: UserPlatformDTO = {
+      name: data.name,
+      id: data.id,
+      login: data.login,
+      profileImgUrl: data.profileImgUrl,
+      auth: {
+        expiresIn: data.auth.expiresIn,
+        accessToken: this.cryptoService.encrypt(data.auth.accessToken),
+        refreshToken: this.cryptoService.encrypt(data.auth.refreshToken)
+      }
+    };
+
     const existsUser = await this.usersRepository.findByPlatformNameAndId(
-      data.name,
-      data.id
+      securityPlatformData.name,
+      securityPlatformData.id
     );
     if (!existsUser) {
-      const user = UserEntity.create([{ ...data }]);
+      const user = UserEntity.create([{ ...securityPlatformData }]);
       await this.usersRepository.save(user);
       return user.toDTO();
     }
 
     const user = await this.usersRepository.updatePlatformAuthDataAtUser(
       existsUser.getId(),
-      data.name,
-      data.auth
+      securityPlatformData.name,
+      securityPlatformData
     );
     if (!user) {
       this.logger.error(`User with ID ${existsUser.getId()} is not found`);

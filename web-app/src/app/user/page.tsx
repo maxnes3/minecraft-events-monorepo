@@ -1,14 +1,17 @@
 'use client';
 
-import { AuthProvider } from '@app/entities/auth';
-import { AuthUserProfile } from '@app/features/auth-user-profile';
-import { ConnectUserToGame } from '@app/features/connect-user-to-game';
+import { AuthProvider } from '@app/features/auth';
+import { PageLayout } from '@app/widgets/page-layout';
+import { Header } from '@app/widgets/header';
+import { UserControlls } from '@app/widgets/user-controlls';
+import { UserProvider } from '@app/features/user';
 
 export default function User() {
   return (
     <AuthProvider>
-      <AuthUserProfile />
-      <ConnectUserToGame />
+      <UserProvider>
+        <PageLayout header={<Header />} content={<UserControlls />} />
+      </UserProvider>
     </AuthProvider>
   );
 }

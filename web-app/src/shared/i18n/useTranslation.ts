@@ -19,6 +19,8 @@ await i18next
   )
   .init({
     debug: false,
+    suppressWarnings: true,
+    suppressDeprecationWarnings: true,
     supportedLngs: publicRuntimeConfig.i18n.supportedLanguages,
     fallbackLng: publicRuntimeConfig.i18n.fallbackLanguage,
     defaultNS: publicRuntimeConfig.i18n.defaultNamespace,

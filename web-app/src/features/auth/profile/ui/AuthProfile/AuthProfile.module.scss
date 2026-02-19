@@ -1,0 +1,19 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: fit-content;
+  gap: rem(12px);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: rem(6px);
+}
+
+.login {
+  margin: 0;
+}

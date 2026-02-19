@@ -1,1 +1,1 @@
-export * from './icons.paths';
+export * from './icons-paths.constants';

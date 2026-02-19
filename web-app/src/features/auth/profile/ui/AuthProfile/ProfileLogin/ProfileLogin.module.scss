@@ -1,0 +1,16 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shimmer {
+  width: 100%;
+  min-width: rem(228px);
+  min-height: rem(36px);
+}

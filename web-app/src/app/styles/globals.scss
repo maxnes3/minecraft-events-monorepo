@@ -12,6 +12,22 @@ body {
   --str-white-color: #ffffff;
   --str-black-color: #000000;
 
+  --str-text-primary-color: #111827;
+
+  --str-gray-color: #a5a5a5;
+  --str-soft-gray-color: #e5e7eb;
+  --str-turquoise-color: #14e3c3;
+  --str-pink-color: #d946ef;
+
+  --str-error-color: #f87171;
+  --str-dark-error-color: #ef4444;
+
+  --str-gradient: linear-gradient(
+    45deg,
+    var(--str-turquoise-color) 0%,
+    var(--str-pink-color) 100%
+  );
+
   /* Platforms vars */
   --str-twitch-color: #9146ff;
   --str-youtube-color: #ff0000;

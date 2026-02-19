@@ -17,10 +17,18 @@ export class AuthController {
   @HttpCode(200)
   public async refreshTokens(
     @AuthTokens('refresh') refreshToken: string,
-    @Res() response: Response
+    @Res({ passthrough: true }) response: Response
   ) {
     const tokens = await this.authService.refreshTokens(refreshToken);
     this.authService.insertTokensInResponse(response, tokens);
+    return formatedHttpResponse({ success: true });
+  }
+
+  @ApiOperation({ summary: 'Logout and remove authentication tokens' })
+  @Post('logout')
+  @HttpCode(200)
+  public logout(@Res({ passthrough: true }) response: Response) {
+    this.authService.removeTokensFromResponse(response);
     return formatedHttpResponse({ success: true });
   }
 }

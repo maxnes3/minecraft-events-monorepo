@@ -6,6 +6,9 @@ export const publicRuntimeConfig = Object.freeze({
     apiPrefix: process.env.NESTJS_APPLICATION_API_PREFIX || 'api/v1',
     name: process.env.NESTJS_APPLICATION_NAME || 'Streaming Events App'
   },
+  crypto: {
+    tokenEncryption: process.env.NESTJS_CRYPTO_TOKEN_ENCRYPTION_KEY || ''
+  },
   jwt: {
     secret: process.env.NESTJS_JWT_SECRET || '',
     expiresIn: Number(process.env.NESTJS_JWT_EXPIRES_IN) || 3600,

@@ -1,17 +1,23 @@
 {
-  "user": {
-    "profile_login_label": "Пользователь: {{loginName}}",
-    "profile_connected_platforms_label": "Платформы: [{{platformNames}}]"
+  "config": {
+    "app_name": "Streaming Events App"
+  },
+  "auth": {
+    "logout_label": "Выйти"
   },
   "platforms": {
     "twitch_name": "Twitch",
     "youtube_name": "Youtube"
   },
   "games": {
-    "connect_label": "Подключиться к игре!"
+    "connect_game_label": "🚀 Подключиться к игре",
+    "connect_token_copied_label": "✅ Токен скопирован!"
   },
   "errors": {
     "unauthorized_message": "Ошибка авторизации!",
     "unknown_message": "Неизвестная ошибка!"
+  },
+  "external": {
+    "github_label": "Github"
   }
 }

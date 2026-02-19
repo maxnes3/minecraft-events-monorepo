@@ -1,1 +1,1 @@
-export * from './endpoints.urls';
+export * from './endpoints-urls';

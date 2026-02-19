@@ -3,29 +3,30 @@ import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { type Response } from 'express';
 import { AuthService, Public } from '@app/auth';
 import { formatedHttpResponse } from '@app/shared/http';
-import { publicRuntimeConfig } from '@app/shared/config';
 import { YoutubePlatformService } from '@app/streaming-platforms/infrastructure/youtube/youtube-patform.service';
 
 @ApiTags('Youtube Auth')
 @Controller('youtube/auth')
 @Public()
 export class YoutubeAuthController {
-  private readonly clientAuthUserUrl: string;
-  private readonly clientErrorUrl: string;
-
   constructor(
     private readonly youtubeService: YoutubePlatformService,
     private readonly authService: AuthService
-  ) {
-    this.clientAuthUserUrl = publicRuntimeConfig.client.authUserRedirectUrl;
-    this.clientErrorUrl = publicRuntimeConfig.client.errorRedirectUrl;
-  }
+  ) {}
 
   @ApiOperation({ summary: 'Redirect to Youtube authorization URL' })
+  @ApiQuery({
+    name: 'redirect_url',
+    description: 'Redirect to URK after Youtube Authorization',
+    type: String,
+    required: false
+  })
   @Get('redirect')
   @HttpCode(200)
-  public redirectToYoutubeAuth() {
-    const authRedirectUrl = this.youtubeService.getAuthUrl();
+  public redirectToYoutubeAuth(
+    @Query('redirect_url') redirectUrl: string | undefined
+  ) {
+    const authRedirectUrl = this.youtubeService.getAuthUrl(redirectUrl);
     return formatedHttpResponse({
       success: true,
       data: { url: authRedirectUrl }
@@ -44,13 +45,10 @@ export class YoutubeAuthController {
   public async authCallback(
     @Query('code') code: string,
     @Query('error') error: string | undefined,
-    @Res() response: Response
+    @Res({ passthrough: true }) response: Response
   ) {
     if (error) {
-      const redirectUrl = new URL(this.clientErrorUrl);
-      redirectUrl.searchParams.append('message', error);
-      response.redirect(redirectUrl.toString());
-      return;
+      return formatedHttpResponse({ success: false, error });
     }
 
     const platformTokens = await this.youtubeService.exchangeCodeToToken(code);
@@ -59,13 +57,8 @@ export class YoutubeAuthController {
       accessToken: platformTokens.accessToken
     });
     if (!platformUser) {
-      const redirectUrl = new URL(this.clientErrorUrl);
-      redirectUrl.searchParams.append(
-        'message',
-        'Not found Youtube User by Access Token'
-      );
-      response.redirect(redirectUrl.toString());
-      return;
+      const errosMessage = 'Not found Youtube User by Access Token';
+      return formatedHttpResponse({ success: false, error: errosMessage });
     }
 
     const tokens = await this.youtubeService.authUserByPlatform(
@@ -76,7 +69,7 @@ export class YoutubeAuthController {
       return;
     }
     this.authService.insertTokensInResponse(response, tokens);
-    response.redirect(this.clientAuthUserUrl);
+    return formatedHttpResponse({ success: true });
   }
 
   @ApiOperation({ summary: 'Refresh Youtube user tokens' })

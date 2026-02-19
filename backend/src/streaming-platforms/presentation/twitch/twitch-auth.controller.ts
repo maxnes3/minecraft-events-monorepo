@@ -22,10 +22,18 @@ export class TwitchAuthController {
   }
 
   @ApiOperation({ summary: 'Redirect to Twitch authorization URL' })
+  @ApiQuery({
+    name: 'redirect_url',
+    description: 'Redirect to URK after Twitch Authorization',
+    type: String,
+    required: false
+  })
   @Get('redirect')
   @HttpCode(200)
-  public redirectToTwitchAuth() {
-    const authRedirectUrl = this.twitchService.getAuthUrl();
+  public redirectToTwitchAuth(
+    @Query('redirect_url') redirectUrl: string | undefined
+  ) {
+    const authRedirectUrl = this.twitchService.getAuthUrl(redirectUrl);
     return formatedHttpResponse({
       success: true,
       data: { url: authRedirectUrl }
@@ -55,13 +63,10 @@ export class TwitchAuthController {
     @Query('state') state: string | undefined,
     @Query('error') error: string | undefined,
     @Query('error_description') errorDescription: string | undefined,
-    @Res() response: Response
+    @Res({ passthrough: true }) response: Response
   ) {
     if (error && errorDescription) {
-      const redirectUrl = new URL(this.clientErrorUrl);
-      redirectUrl.searchParams.append('message', error);
-      response.redirect(redirectUrl.toString());
-      return;
+      return formatedHttpResponse({ success: false, error: errorDescription });
     }
 
     const platformTokens = await this.twitchService.exchangeCodeToToken(code);
@@ -70,13 +75,8 @@ export class TwitchAuthController {
       accessToken: platformTokens.accessToken
     });
     if (!platformUser) {
-      const redirectUrl = new URL(this.clientErrorUrl);
-      redirectUrl.searchParams.append(
-        'message',
-        'Not found Twitch User by Access Token'
-      );
-      response.redirect(redirectUrl.toString());
-      return;
+      const errosMessage = 'Not found Twitch User by Access Token';
+      return formatedHttpResponse({ success: false, error: errosMessage });
     }
 
     const tokens = await this.twitchService.authUserByPlatform(
@@ -87,7 +87,7 @@ export class TwitchAuthController {
       return;
     }
     this.authService.insertTokensInResponse(response, tokens);
-    response.redirect(this.clientAuthUserUrl);
+    return formatedHttpResponse({ success: true });
   }
 
   @ApiOperation({ summary: 'Refresh Twitch user tokens' })

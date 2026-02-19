@@ -39,11 +39,11 @@ export class TwitchPlatformService implements IStreamingPlatformService {
     this.logger.setContext(TwitchPlatformService.name);
   }
 
-  public getAuthUrl(): string {
+  public getAuthUrl(redirectUrl?: string): string {
     const authUrl = new URL(`${this.idUrl}/oauth2/authorize`);
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: this.redirectUrl,
+      redirect_uri: redirectUrl || this.redirectUrl,
       response_type: 'code',
       force_verify: 'true',
       scope: publicRuntimeConfig.twitch.authScopes.join(' ')

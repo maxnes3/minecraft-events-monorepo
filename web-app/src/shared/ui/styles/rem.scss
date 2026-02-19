@@ -1,22 +1,29 @@
+@use "sass:list";
+@use "sass:meta";
+@use "sass:math";
+
 $rem-baseline: 16px !default;
 $rem-fallback: false !default;
 $rem-px-only: false !default;
 
 @function rem-separator($list, $separator: false) {
   @if $separator == 'comma' or $separator == 'space' {
-    @return append($list, null, $separator);
+    @return list.append($list, null, $separator);
   }
 
-  @if function-exists('list-separator') == true {
-    @return list-separator($list);
+  @if meta.function-exists('list-separator') == true {
+    @return list.separator($list);
   }
 
   $test-list: ();
   @each $item in $list {
-    $test-list: append($test-list, $item, space);
+    $test-list: list.append($test-list, $item, space);
   }
 
-  @return if($test-list == $list, space, comma);
+  @if $test-list == $list {
+    @return space;
+  }
+  @return comma;
 }
 
 @mixin rem-baseline($zoom: 100%) {
@@ -28,21 +35,24 @@ $rem-px-only: false !default;
   $separator: rem-separator($values);
 
   @each $value in $values {
-    @if type-of($value) == 'number' and unit($value) == 'rem' and $to == 'px' {
-      $result: append($result, $value / 1rem * $rem-baseline, $separator);
-    } @else if type-of($value) == 'number' and unit($value) == 'px' and $to == 'rem' {
-      $result: append($result, calc($value / $rem-baseline) * 1rem, $separator);
-    } @else if type-of($value) == 'list' {
+    @if meta.type-of($value) == 'number' and math.unit($value) == 'rem' and $to == 'px' {
+      $result: list.append($result, $value / 1rem * $rem-baseline, $separator);
+    } @else if meta.type-of($value) == 'number' and math.unit($value) == 'px' and $to == 'rem' {
+      $result: list.append($result, calc($value / $rem-baseline) * 1rem, $separator);
+    } @else if meta.type-of($value) == 'list' {
       $value-separator: rem-separator($value);
       $value: rem-convert($to, $value...);
       $value: rem-separator($value, $value-separator);
-      $result: append($result, $value, $separator);
+      $result: list.append($result, $value, $separator);
     } @else {
-      $result: append($result, $value, $separator);
+      $result: list.append($result, $value, $separator);
     }
   }
 
-  @return if(length($result) == 1, nth($result, 1), $result);
+  @if list.length($result) == 1 {
+    @return list.nth($result, 1);
+  }
+  @return $result;
 }
 
 @function rem($values...) {
@@ -54,7 +64,7 @@ $rem-px-only: false !default;
 }
 
 @mixin rem($properties, $values...) {
-  @if type-of($properties) == 'map' {
+  @if meta.type-of($properties) == 'map' {
     @each $property in map-keys($properties) {
       @include rem($property, map-get($properties, $property));
     }

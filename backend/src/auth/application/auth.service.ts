@@ -129,6 +129,11 @@ export class AuthService {
     );
   }
 
+  public removeTokensFromResponse(response: Response) {
+    this.removeCookie(response, this.accessTokenCookieName);
+    this.removeCookie(response, this.refreshTokenCookieName);
+  }
+
   private addCookieToResponse(
     response: Response,
     cookie: string,
@@ -141,6 +146,15 @@ export class AuthService {
       sameSite: 'none',
       path: '/',
       maxAge: expiresIn
+    });
+  }
+
+  private removeCookie(response: Response, cookie: string) {
+    response.clearCookie(cookie, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/'
     });
   }
 }

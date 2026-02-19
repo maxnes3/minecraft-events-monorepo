@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
-import { UserDTO } from '@app/users/application/dto/user.dto';
 import { publicRuntimeConfig } from '@app/shared/config';
+import { UserDTO } from '@app/users/application/dto/user.dto';
+import { UserGameConnectToken } from './user-game-connect-token.vo';
 
 export class UserPlatformAuthData {
   accessToken: string;
@@ -21,6 +22,7 @@ export class UserEntity {
   constructor(
     private readonly _id: string,
     private platforms: UserPlatformData[],
+    private gameConnectToken: string,
     private lang: string,
     private createdAt: Date = new Date(),
     private updatedAt: Date = new Date()
@@ -31,12 +33,14 @@ export class UserEntity {
     lang: string = publicRuntimeConfig.i18n.fallbackLanguage
   ): UserEntity {
     const id = new Types.ObjectId().toString();
-    return new UserEntity(id, platformsData, lang);
+    const gameConnectToken = UserGameConnectToken.generate();
+    return new UserEntity(id, platformsData, gameConnectToken.getValue(), lang);
   }
 
   public static restore(
     id: string,
     platformsData: UserPlatformData[],
+    gameConnectToken: string,
     lang: string = publicRuntimeConfig.i18n.fallbackLanguage,
     createdAt?: Date,
     updatedAt?: Date
@@ -44,6 +48,7 @@ export class UserEntity {
     return new UserEntity(
       id,
       platformsData,
+      gameConnectToken,
       lang,
       createdAt || new Date(),
       updatedAt || new Date()
@@ -54,10 +59,15 @@ export class UserEntity {
     return {
       _id: this._id,
       platforms: this.platforms,
+      gameConnectToken: this.gameConnectToken,
       lang: this.lang,
       createdAt: this.createdAt.toDateString(),
       updatedAt: this.updatedAt.toDateString()
     };
+  }
+
+  public setGameConnectToken(token: string): void {
+    this.gameConnectToken = token;
   }
 
   public setLang(lang: string): void {
@@ -84,16 +94,20 @@ export class UserEntity {
     return this._id;
   }
 
-  public getLang(): string {
-    return this.lang;
-  }
-
   public getPlatforms(): UserPlatformData[] {
     return [...this.platforms];
   }
 
   public getPlatformByName(platformName: string): UserPlatformData | undefined {
     return this.platforms.find((p) => p.name === platformName);
+  }
+
+  public getGameConnectToken(): string | undefined {
+    return this.gameConnectToken;
+  }
+
+  public getLang(): string {
+    return this.lang;
   }
 
   public getCreatedAt(): Date {

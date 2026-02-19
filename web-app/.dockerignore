@@ -1,0 +1,15 @@
+# Directories
+node_modules/
+.git/
+scripts/
+docker/
+.next/
+.vscode/
+.idea/
+
+# Files
+.gitignore
+.DS_Store
+.env
+README.md
+.dockerignore

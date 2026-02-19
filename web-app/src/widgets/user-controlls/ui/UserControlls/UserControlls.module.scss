@@ -1,0 +1,11 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  height: fit-content;
+  padding: rem(16px);
+  gap: rem(8px);
+  border-radius: rem(16px);
+}

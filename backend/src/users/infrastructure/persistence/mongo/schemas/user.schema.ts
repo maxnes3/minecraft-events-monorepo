@@ -49,6 +49,9 @@ export class User {
   platforms: UserPlatformData[];
 
   @Prop({ required: true, trim: true })
+  gameConnectToken: string;
+
+  @Prop({ required: true, trim: true })
   lang: string;
 
   @Prop({ default: Date.now })
@@ -66,3 +69,4 @@ UserSchema.index(
   { 'platforms.name': 1, 'platforms.id': 1 },
   { unique: true, sparse: true }
 );
+UserSchema.index({ gameConnectToken: 1 }, { sparse: true });
