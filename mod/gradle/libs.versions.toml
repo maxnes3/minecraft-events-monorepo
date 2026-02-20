@@ -1,0 +1,25 @@
+[versions]
+minecraft = "1.21.11"
+
+fabric-loader = "0.18.4"
+fabric-kotlin = "1.13.8+kotlin.2.3.0"
+fabric-api = "0.141.2+1.21.11"
+
+socket-io = "2.1.2"
+reflection = "0.10.2"
+koin-core = "3.5.0"
+
+[libraries]
+mojang-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+fabric-kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric-kotlin" }
+
+socket-io = { module = "io.socket:socket.io-client", version.ref = "socket-io" }
+reflection = { module = "org.reflections:reflections", version.ref = "reflection" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-core" }
+
+[plugins]
+fabric-loom = { id = "net.fabricmc.fabric-loom-remap", version = "1.15-SNAPSHOT" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }

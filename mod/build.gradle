@@ -1,0 +1,83 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+	alias(libs.plugins.fabric.loom)
+	id 'maven-publish'
+	alias(libs.plugins.jetbrains.kotlin.jvm)
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"streamingevents" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+
+}
+
+dependencies {
+	implementation(libs.socket.io)
+	implementation(libs.reflection)
+
+	minecraft(libs.mojang.minecraft)
+
+	mappings loom.officialMojangMappings()
+
+	modImplementation(libs.fabric.loader)
+	modImplementation(libs.fabric.api)
+	modImplementation(libs.fabric.kotlin)
+	modImplementation(libs.koin.core)
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+	inputs.property "archivesName", project.base.archivesName
+
+	from("LICENSE") {
+		rename { "${it}_${inputs.properties.archivesName}"}
+	}
+}
+
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			artifactId = project.archives_base_name
+			from components.java
+		}
+	}
+}
