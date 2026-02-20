@@ -5,6 +5,8 @@ test/
 .git/
 scripts/
 docker/
+.vscode/
+.idea/
 
 # Files
 .gitignore

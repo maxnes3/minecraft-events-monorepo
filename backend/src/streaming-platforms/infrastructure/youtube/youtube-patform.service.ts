@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { AuthService } from '@app/auth';
+import { AuthService, AuthTokensDTO } from '@app/auth';
 import { UsersService } from '@app/users';
 import { LoggerService } from '@app/shared/logger';
 import { publicRuntimeConfig } from '@app/shared/config';
-import { YoutubeApiUserTokensDTO } from './dto/youtube-api-user-tokens.dto';
 import { HttpClient, HttpRequestConfig } from '@app/shared/http';
-import { YoutubeMapper } from './mappers/youtube.mappers';
-import { YoutubeApiUserResponse } from './dto/youtube-api-user.dto';
-import { YoutubeSendMessageDTO } from './dto/youtube-send-message.dto';
 import { StreamingPlatformTokensDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-tokens.dto';
 import { StreamingPlaftormUserDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-user.dto';
 import { IStreamingPlatformService } from '@app/streaming-platforms/domain/interfaces/streaming-platform-service.interface';
-import { YoutubeApiStreamResponse } from './dto/youtube-api-stream.dto';
-import { StreamingPlatformAuthDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth.dto';
 import { StreamingPlatformAuthRequestDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-auth-request.dto';
 import { StreamingPlaftormStreamDTO } from '@app/streaming-platforms/domain/dto/streaming-platform-stream.dto';
+import { YoutubeApiUserTokensDTO } from './dto/youtube-api-user-tokens.dto';
+import { YoutubeMapper } from './mappers/youtube.mappers';
+import { YoutubeApiUserResponse } from './dto/youtube-api-user.dto';
+import { YoutubeSendMessageDTO } from './dto/youtube-send-message.dto';
+import { YoutubeApiStreamResponse } from './dto/youtube-api-stream.dto';
 
 @Injectable()
 export class YoutubePlatformService implements IStreamingPlatformService {
@@ -42,14 +41,11 @@ export class YoutubePlatformService implements IStreamingPlatformService {
     this.logger.setContext(YoutubePlatformService.name);
   }
 
-  public getAuthUrl(isClient?: boolean): string {
+  public getAuthUrl(redirectUrl?: string): string {
     const authUrl = new URL(`${this.accountsUrl}/o/oauth2/v2/auth`);
-    const redirectUri = isClient
-      ? publicRuntimeConfig.client.url
-      : this.redirectUrl;
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: redirectUri,
+      redirect_uri: redirectUrl || this.redirectUrl,
       response_type: 'code',
       scope: publicRuntimeConfig.youtube.authScopes.join(' '),
       access_type: 'offline',
@@ -215,7 +211,7 @@ export class YoutubePlatformService implements IStreamingPlatformService {
   public async authUserByPlatform(
     tokens: StreamingPlatformTokensDTO,
     data: StreamingPlaftormUserDTO
-  ): Promise<StreamingPlatformAuthDTO | null> {
+  ): Promise<AuthTokensDTO | null> {
     const user = await this.usersService.upsertUserByPlatformAuth({
       name: data.platformName,
       id: data.platformId,
@@ -231,12 +227,7 @@ export class YoutubePlatformService implements IStreamingPlatformService {
 
     const userTokens = await this.authService.createToken(user._id);
     this.logger.debug(`User tokens: ${JSON.stringify(userTokens)}`);
-    return {
-      platformName: data.platformName,
-      login: data.platformLogin,
-      profileImgUrl: data.platformProfileImgUrl,
-      auth: userTokens
-    };
+    return userTokens;
   }
 
   public async getStreamInLive(

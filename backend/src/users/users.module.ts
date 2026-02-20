@@ -10,6 +10,7 @@ import {
 import { UserMapper } from './infrastructure/persistence/mongo/mappers/user.mapper';
 import { UsersRepository } from './infrastructure/persistence/mongo/repositories/users.repository';
 import { UserPresentationMapper } from './presentation/mappers/users-presentation.mapper';
+import { CryptoService } from './infrastructure/security/crypto.service';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { UserPresentationMapper } from './presentation/mappers/users-presentatio
     UsersService,
     UserMapper,
     UsersRepository,
-    UserPresentationMapper
+    UserPresentationMapper,
+    CryptoService
   ],
   exports: [UsersService]
 })

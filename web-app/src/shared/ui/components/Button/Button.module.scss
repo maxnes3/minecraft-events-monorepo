@@ -1,0 +1,18 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  position: relative;
+  padding: rem(8px);
+  border-radius: rem(8px);
+  border: rem(1px) solid var(--str-soft-gray-color);
+  border-bottom: rem(4px) solid var(--str-soft-gray-color);
+
+  background-color: var(--str-white-color);
+  color: var(--str-text-primary-color);
+  box-shadow: rem(0 1px 2px) rgba(0, 0, 0, 0.04);
+
+  font-family: var(--str-font-primary);
+  font-weight: 600;
+  font-size: rem(16px);
+  cursor: pointer;
+}

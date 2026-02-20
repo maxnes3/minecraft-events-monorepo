@@ -1,10 +1,10 @@
 import { Body, Controller, HttpCode, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UsersService } from '../application/users.service';
 import { formatedHttpResponse } from '@app/shared/http';
-import { UserRemovePlatformDTO } from '../application/dto/user-remove-platform.dto';
 import { publicRuntimeConfig } from '@app/shared/config';
 import { AuthUser } from '@app/auth';
+import { UsersService } from '../application/users.service';
+import { UserRemovePlatformDTO } from '../application/dto/user-remove-platform.dto';
 
 @ApiBearerAuth(publicRuntimeConfig.jwt.authorizationHeader)
 @ApiTags('Users Platform')

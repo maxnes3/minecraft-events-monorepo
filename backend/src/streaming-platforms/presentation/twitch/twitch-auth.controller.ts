@@ -1,31 +1,43 @@
 import { Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
-import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { publicRuntimeConfig } from '@app/shared/config';
+import { type Response } from 'express';
+import { AuthService, Public } from '@app/auth';
 import { formatedHttpResponse } from '@app/shared/http';
-import { Public } from '@app/auth';
-import type { Response } from 'express';
+import { publicRuntimeConfig } from '@app/shared/config';
+import { TwitchPlatformService } from '@app/streaming-platforms/infrastructure/twitch/twitch-platform.service';
 
 @ApiTags('Twitch Auth')
 @Controller('twitch/auth')
 @Public()
 export class TwitchAuthController {
-  constructor(private readonly twitchService: TwitchPlatformService) {}
+  private readonly clientAuthUserUrl: string;
+  private readonly clientErrorUrl: string;
+
+  constructor(
+    private readonly twitchService: TwitchPlatformService,
+    private readonly authService: AuthService
+  ) {
+    this.clientAuthUserUrl = publicRuntimeConfig.client.authUserRedirectUrl;
+    this.clientErrorUrl = publicRuntimeConfig.client.errorRedirectUrl;
+  }
 
   @ApiOperation({ summary: 'Redirect to Twitch authorization URL' })
   @ApiQuery({
-    name: 'is_client',
-    description: 'Redirect to Client URL after Twitch authorization',
-    type: Boolean,
+    name: 'redirect_url',
+    description: 'Redirect to URK after Twitch Authorization',
+    type: String,
     required: false
   })
   @Get('redirect')
+  @HttpCode(200)
   public redirectToTwitchAuth(
-    @Query('is_client') isClient: boolean | undefined,
-    @Res() response: Response
+    @Query('redirect_url') redirectUrl: string | undefined
   ) {
-    const authRedirectUrl = this.twitchService.getAuthUrl(isClient);
-    response.redirect(authRedirectUrl);
+    const authRedirectUrl = this.twitchService.getAuthUrl(redirectUrl);
+    return formatedHttpResponse({
+      success: true,
+      data: { url: authRedirectUrl }
+    });
   }
 
   @ApiOperation({ summary: 'Twitch authorization callback' })
@@ -45,48 +57,37 @@ export class TwitchAuthController {
     required: false,
     description: 'Error description if failed'
   })
-  @ApiQuery({
-    name: 'is_client',
-    description: 'Redirect to Client URL',
-    required: false
-  })
   @Get('callback')
   public async authCallback(
     @Query('code') code: string,
     @Query('state') state: string | undefined,
     @Query('error') error: string | undefined,
     @Query('error_description') errorDescription: string | undefined,
-    @Query('is_client') isClient: boolean | undefined,
-    @Res() response: Response
+    @Res({ passthrough: true }) response: Response
   ) {
     if (error && errorDescription) {
-      if (!isClient) {
-        response.redirect(
-          `/error?message=${encodeURIComponent(errorDescription)}`
-        );
-        return;
-      }
-      return formatedHttpResponse({ success: false, error });
+      return formatedHttpResponse({ success: false, error: errorDescription });
     }
 
-    const tokens = await this.twitchService.exchangeCodeToToken(code);
+    const platformTokens = await this.twitchService.exchangeCodeToToken(code);
 
-    const userData = await this.twitchService.getUser({
-      accessToken: tokens.accessToken
+    const platformUser = await this.twitchService.getUser({
+      accessToken: platformTokens.accessToken
     });
-    if (!userData) {
-      return formatedHttpResponse({ success: false });
+    if (!platformUser) {
+      const errosMessage = 'Not found Twitch User by Access Token';
+      return formatedHttpResponse({ success: false, error: errosMessage });
     }
 
-    const authData = await this.twitchService.authUserByPlatform(
-      tokens,
-      userData
+    const tokens = await this.twitchService.authUserByPlatform(
+      platformTokens,
+      platformUser
     );
-    if (!isClient) {
-      response.redirect(`/${publicRuntimeConfig.application.apiPrefix}`);
+    if (!tokens) {
       return;
     }
-    return formatedHttpResponse({ success: true, data: authData });
+    this.authService.insertTokensInResponse(response, tokens);
+    return formatedHttpResponse({ success: true });
   }
 
   @ApiOperation({ summary: 'Refresh Twitch user tokens' })

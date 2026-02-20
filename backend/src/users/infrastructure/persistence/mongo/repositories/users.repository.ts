@@ -3,7 +3,6 @@ import { Model } from 'mongoose';
 import { IUsersRepository } from '@app/users/domain/repositories/users-repository.interface';
 import {
   UserEntity,
-  UserPlatformAuthData,
   UserPlatformData
 } from '@app/users/domain/entities/user.entity';
 import { User, UserDocument } from '../schemas/user.schema';
@@ -33,6 +32,15 @@ export class UsersRepository implements IUsersRepository {
           }
         }
       })
+      .exec();
+    return this.mapper.toDomain(document);
+  }
+
+  public async findByGameConnectToken(
+    token: string
+  ): Promise<UserEntity | null> {
+    const document = await this.userModel
+      .findOne({ gameConnectToken: token })
       .exec();
     return this.mapper.toDomain(document);
   }
@@ -107,10 +115,23 @@ export class UsersRepository implements IUsersRepository {
       .exec();
   }
 
+  public async updateGameConnectTokenAtUser(
+    userId: string,
+    token: string
+  ): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $set: { gameConnectToken: token } },
+        { new: true }
+      )
+      .exec();
+  }
+
   public async updatePlatformAuthDataAtUser(
     userId: string,
     platformName: string,
-    authData: UserPlatformAuthData
+    data: UserPlatformData
   ): Promise<UserEntity | null> {
     const document = await this.userModel
       .findOneAndUpdate(
@@ -120,7 +141,9 @@ export class UsersRepository implements IUsersRepository {
         },
         {
           $set: {
-            'platforms.$.auth': authData,
+            'platforms.$.login': data.login,
+            'platforms.$.profileImgUrl': data.profileImgUrl,
+            'platforms.$.auth': data.auth,
             updatedAt: new Date()
           }
         },

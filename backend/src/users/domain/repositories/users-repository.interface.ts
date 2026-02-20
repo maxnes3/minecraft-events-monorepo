@@ -1,8 +1,4 @@
-import {
-  UserEntity,
-  UserPlatformAuthData,
-  UserPlatformData
-} from '../entities/user.entity';
+import { UserEntity, UserPlatformData } from '../entities/user.entity';
 
 export interface IUsersRepository {
   findById(id: string): Promise<UserEntity | null>;
@@ -10,6 +6,7 @@ export interface IUsersRepository {
     platformName: string,
     platformId: string
   ): Promise<UserEntity | null>;
+  findByGameConnectToken(token: string): Promise<UserEntity | null>;
 
   save(user: UserEntity): Promise<void>;
   update(user: UserEntity): Promise<void>;
@@ -26,10 +23,12 @@ export interface IUsersRepository {
     platformData: UserPlatformData
   ): Promise<void>;
   removePlatformFromUser(userId: string, platformName: string): Promise<void>;
+
+  updateGameConnectTokenAtUser(userId: string, token: string): Promise<void>;
   updatePlatformAuthDataAtUser(
     userId: string,
     platformName: string,
-    authData: UserPlatformAuthData
+    authData: UserPlatformData
   ): Promise<UserEntity | null>;
   updatePlatformPropertiesAtUser(
     userId: string,

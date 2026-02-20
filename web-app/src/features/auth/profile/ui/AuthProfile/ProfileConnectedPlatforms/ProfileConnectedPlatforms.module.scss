@@ -1,0 +1,12 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.shimmer {
+  width: rem(124px);
+  min-height: rem(36px);
+}

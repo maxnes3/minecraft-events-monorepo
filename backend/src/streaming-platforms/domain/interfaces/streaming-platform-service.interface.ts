@@ -1,8 +1,8 @@
+import { AuthTokensDTO } from '@app/auth';
 import { IStreamingPlatformSendMessageDTO } from './streaming-platform-send-message.interface';
 import { StreamingPlatformTokensDTO } from '../dto/streaming-platform-tokens.dto';
 import { StreamingPlaftormUserDTO } from '../dto/streaming-platform-user.dto';
 import { StreamingPlatformAuthRequestDTO } from '../dto/streaming-platform-auth-request.dto';
-import { StreamingPlatformAuthDTO } from '../dto/streaming-platform-auth.dto';
 import { StreamingPlaftormStreamDTO } from '../dto/streaming-platform-stream.dto';
 
 export interface IStreamingPlatformService {
@@ -14,7 +14,7 @@ export interface IStreamingPlatformService {
   authUserByPlatform(
     tokens: StreamingPlatformTokensDTO,
     data: StreamingPlaftormUserDTO
-  ): Promise<StreamingPlatformAuthDTO | null>;
+  ): Promise<AuthTokensDTO | null>;
   getStreamInLive(
     authData: StreamingPlatformAuthRequestDTO
   ): Promise<StreamingPlaftormStreamDTO | null>;

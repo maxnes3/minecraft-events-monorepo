@@ -1,0 +1,31 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: var(--str-white-color);
+}
+
+.iconContainer {
+  box-sizing: border-box;
+  width: rem(36px);
+  height: rem(36px);
+  padding: rem(4px);
+  border-radius: rem(8px 0 0 8px);
+  background: var(--str-gradient);
+}
+
+.icon {
+}
+
+.label {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: rem(36px);
+  padding: rem(0px 16px);
+  font-size: rem(18px);
+  border: rem(2px) solid var(--str-soft-gray-color);
+  border-radius: rem(0 8px 8px 0);
+}

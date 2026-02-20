@@ -17,6 +17,13 @@ export class UserDTO {
   platforms: UserPlatformDTO[];
 
   @ApiProperty({
+    description: 'Token for connection to game',
+    type: String,
+    required: true
+  })
+  gameConnectToken: string;
+
+  @ApiProperty({
     description: 'Language of the user',
     type: String,
     required: true

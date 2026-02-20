@@ -1,9 +1,9 @@
 import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoggerService } from '@app/shared/logger';
+import { formatedHttpResponse } from '@app/shared/http';
 import { YoutubePlatformService } from '@app/streaming-platforms/infrastructure/youtube/youtube-patform.service';
 import { YoutubeSendMessageDTO } from '@app/streaming-platforms/infrastructure/youtube/dto/youtube-send-message.dto';
-import { formatedHttpResponse } from '@app/shared/http';
 
 @ApiTags('Youtube Stream')
 @Controller('youtube/stream')

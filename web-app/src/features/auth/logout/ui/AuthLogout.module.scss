@@ -1,0 +1,14 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  width: 100%;
+  background-color: var(--str-error-color);
+  border: rem(1px) solid var(--str-dark-error-color);
+  border-bottom: rem(4px) solid var(--str-dark-error-color);
+  color: var(--str-white-color);
+}
+
+.shimmer {
+  width: 100%;
+  min-height: 42px;
+}

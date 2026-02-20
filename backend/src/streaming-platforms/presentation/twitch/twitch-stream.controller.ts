@@ -1,9 +1,9 @@
 import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoggerService } from '@app/shared/logger';
-import { TwitchSendMessageDTO } from '../../infrastructure/twitch/dto/twitch-send-message.dto';
-import { TwitchPlatformService } from '../../infrastructure/twitch/twitch-platform.service';
 import { formatedHttpResponse } from '@app/shared/http';
+import { TwitchSendMessageDTO } from '@app/streaming-platforms/infrastructure/twitch/dto/twitch-send-message.dto';
+import { TwitchPlatformService } from '@app/streaming-platforms/infrastructure/twitch/twitch-platform.service';
 
 @ApiTags('Twitch Stream')
 @Controller('twitch/stream')

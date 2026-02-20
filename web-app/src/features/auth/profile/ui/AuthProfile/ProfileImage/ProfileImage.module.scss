@@ -1,0 +1,26 @@
+@use "@app/shared/ui/styles/rem" as *;
+
+.root {
+  padding: rem(8px);
+  border-radius: rem(16px);
+  background-color: var(--str-white-color);
+  border: rem(2px) solid var(--str-soft-gray-color);
+}
+
+.imageContainer {
+  width: rem(82px);
+  height: rem(82px);
+  padding: rem(4px);
+  border-radius: 50%;
+  background: var(--str-gradient);
+}
+
+.image {
+  border-radius: 50%;
+}
+
+.shimmer {
+  width: rem(110px);
+  height: rem(110px);
+  border-radius: rem(16px);
+}
