@@ -31,7 +31,13 @@ loom {
 
 dependencies {
 	implementation(libs.socket.io)
-	implementation(libs.reflection)
+	include(libs.socket.io)
+	include(libs.engine.io)
+	include(libs.json.json)
+	include(libs.squareup.okhttp3)
+	include(libs.squareup.okio)
+	implementation(libs.koin.core)
+	include(libs.koin.core)
 
 	minecraft(libs.mojang.minecraft)
 
@@ -40,7 +46,6 @@ dependencies {
 	modImplementation(libs.fabric.loader)
 	modImplementation(libs.fabric.api)
 	modImplementation(libs.fabric.kotlin)
-	modImplementation(libs.koin.core)
 }
 
 processResources {

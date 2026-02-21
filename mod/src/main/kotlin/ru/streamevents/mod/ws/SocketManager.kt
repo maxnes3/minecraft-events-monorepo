@@ -2,8 +2,10 @@ package ru.streamevents.mod.ws
 
 import io.socket.client.IO
 import io.socket.client.Socket
+import org.json.JSONException
 import org.json.JSONObject
 import ru.streamevents.mod.StreamingEventsMod.log
+import java.net.URISyntaxException
 
 class SocketManager {
     lateinit var socket: Socket
@@ -17,7 +19,13 @@ class SocketManager {
 
         // TODO посмотреть как работают переменные среды с модами,
         // чтобы такого не было
-        socket = IO.socket("ws://localhost:3000/?platform=twitch&EIO=4&transport=websocket", opts)
+        try {
+            socket = IO.socket("ws://localhost:3000/?platform=twitch&EIO=4&transport=websocket", opts)
+        } catch (e: URISyntaxException) {
+            log.error("Invalid URI to the backend {}", e.message, e)
+        } catch (e: Exception) {
+            log.error("Could not initialize socket {}", e.message, e)
+        }
 
         socket.on(Socket.EVENT_CONNECT) {
             log.info("Socket.IO подключение установлено")

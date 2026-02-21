@@ -10,7 +10,7 @@ Brief description
 
 ## Commands
 
-- `/str:connect <token>` — authenticate player against backend
+- `/str:connect <token>` — authenticate player against backend by token from web-app
 - `/str:disconnect` — terminate session
 
 ---
@@ -27,7 +27,7 @@ Brief description
 
 ```bash
 cd mod
-./gradlew build
+./gradlew clean build
 ```
 
 The compiled .jar file will be located in the /build/libs directory
@@ -36,3 +36,7 @@ The compiled .jar file will be located in the /build/libs directory
 
 1. By copying .jar into .minecraft/mods/
 2. ./gradlew runClient
+
+## Useful info
+
+1. Full dependency tree by include()

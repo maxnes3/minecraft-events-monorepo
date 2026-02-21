@@ -14,9 +14,14 @@ object StreamingEventsMod : ModInitializer {
 
 	override fun onInitialize() {
         log.info("Initializing StreamingEventsMod")
+
 		startKoin {
 			modules(serverModule)
 		}
 		CommandRegistrar.registerAll()
 	}
 }
+
+// TODO ошибки в чат
+// TODO include транзитивных зависимостей
+// TODO лог в чат помимо log файла

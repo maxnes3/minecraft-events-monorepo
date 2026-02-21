@@ -6,8 +6,12 @@ fabric-kotlin = "1.13.8+kotlin.2.3.0"
 fabric-api = "0.141.2+1.21.11"
 
 socket-io = "2.1.2"
+engine-io = "2.1.0"
 reflection = "0.10.2"
 koin-core = "3.5.0"
+json-json = "20090211"
+squareup-okhttp3 = "3.12.12"
+squareup-okio = "1.15.0"
 
 [libraries]
 mojang-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -17,8 +21,12 @@ fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 fabric-kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric-kotlin" }
 
 socket-io = { module = "io.socket:socket.io-client", version.ref = "socket-io" }
+engine-io = { module = "io.socket:engine.io-client", version.ref = "engine-io" }
 reflection = { module = "org.reflections:reflections", version.ref = "reflection" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-core" }
+json-json = { module = "org.json:json", version.ref = "json-json" }
+squareup-okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "squareup-okhttp3" }
+squareup-okio = { module = "com.squareup.okio:okio", version.ref = "squareup-okio" }
 
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom-remap", version = "1.15-SNAPSHOT" }

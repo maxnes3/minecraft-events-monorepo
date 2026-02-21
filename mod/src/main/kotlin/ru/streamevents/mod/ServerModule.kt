@@ -1,5 +1,6 @@
 package ru.streamevents.mod
 
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import ru.streamevents.mod.command.ModCommand
 import ru.streamevents.mod.command.impl.ConnectCommand
@@ -10,6 +11,6 @@ val serverModule = module {
 
     single { SocketManager() }
 
-    single<ModCommand> { ConnectCommand(get()) }
-    single<ModCommand> { DisconnectCommand(get()) }
+    single { ConnectCommand(get()) } bind ModCommand::class
+    single { DisconnectCommand(get()) } bind ModCommand::class
 }
