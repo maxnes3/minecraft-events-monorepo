@@ -1,0 +1,45 @@
+{
+	"schemaVersion": 1,
+	"id": "streamingevents",
+	"version": "${version}",
+	"name": "StreamingEvents",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/streamingevents/icon.svg",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			{
+				"value": "ru.streamevents.mod.StreamingEventsMod",
+				"adapter": "kotlin"
+			}
+		],
+		"client": [
+			{
+				"value": "ru.streamevents.mod.StreamingEventsClientMod",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"mixins": [
+		"streamingevents.mixins.json",
+		{
+			"config": "streamingevents.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"fabric-language-kotlin": "*"
+	}
+}

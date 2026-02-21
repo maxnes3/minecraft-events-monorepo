@@ -14,4 +14,6 @@ Empower your community to participate in decision-making, event planning, and in
 
 ## [🐦‍🔥 Docs for build up web-app](./web-app/README.md)
 
+## [🍗 Docs for build up Minecraft Fabric mod](./mod/README.md)
+
 ### If this project helps you engage your streaming community, please give it a ⭐️ on GitHub!
