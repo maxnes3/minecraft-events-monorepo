@@ -1,8 +1,8 @@
 {
   "name": "backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
-  "author": "",
+  "author": "Maxim Bondarenko",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -20,21 +20,35 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.12",
+    "@nestjs/websockets": "^11.1.12",
+    "cookie-parser": "^1.4.7",
+    "mongoose": "^9.1.2",
+    "nestjs-i18n": "^10.6.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
+    "@asyncapi/cli": "^5.0.6",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
+    "@nestjs/swagger": "^11.2.3",
     "@nestjs/testing": "^11.0.1",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/mongoose": "^5.11.97",
     "@types/node": "^22.10.7",
+    "@types/socket.io": "^3.0.2",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",

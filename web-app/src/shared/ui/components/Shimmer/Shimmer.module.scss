@@ -1,0 +1,28 @@
+.root {
+  position: relative;
+  background: var(--str-soft-gray-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.6) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    animation: shine 2s infinite;
+    filter: blur(4px);
+  }
+}
+
+@keyframes shine {
+  100% {
+    transform: translateX(100%);
+  }
+}

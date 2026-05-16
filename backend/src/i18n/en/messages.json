@@ -1,0 +1,14 @@
+{
+  "voting": {
+    "started": "🗳️ Voting has started! Cast your vote now!",
+    "completed": "🏆 The winner is '{eventName}'!, with a vote count of {voteCount}."
+  },
+  "events": {
+    "started": "🚀 The event '{eventName}' has started!",
+    "completed": "🏁 The event '{eventName}' has completed!"
+  },
+  "websocket": {
+    "connected": "💫 The '{appName}' connected with {platformName}!",
+    "disconnected": "🚫 The '{appName}' disconnected!"
+  }
+}

@@ -1,0 +1,8 @@
+FROM mongo:6.0
+
+COPY ./mongo-init.js /docker-entrypoint-initdb.d/
+
+VOLUME /data/db
+EXPOSE 27017
+
+CMD ["mongod", "--auth", "--logpath", "/dev/null", "--setParameter", "logLevel=1"]

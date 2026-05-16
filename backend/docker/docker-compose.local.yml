@@ -1,0 +1,50 @@
+version: "3.8"
+
+name: streaming-events
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: streaming-events-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: ./.env.common
+        required: true
+      - path: ./.env.local
+        required: true
+      - path: ./.env.database
+        required: true
+    volumes:
+      - ../:/app
+      - /app/node_modules
+    working_dir: /app
+    command: pnpm run start:dev
+    restart: unless-stopped
+    depends_on:
+      - mongo
+  
+  mongo:
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo
+    container_name: streaming-events-mongo
+    ports:
+      - "27017:27017"
+    env_file:
+      - path: ./.env.database
+        required: true
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mongo-data:

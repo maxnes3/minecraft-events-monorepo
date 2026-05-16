@@ -1,0 +1,16 @@
+# Directories
+node_modules/
+dist/
+test/
+.git/
+scripts/
+docker/
+.vscode/
+.idea/
+
+# Files
+.gitignore
+.DS_Store
+.env
+README.md
+.dockerignore

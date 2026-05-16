@@ -1,0 +1,14 @@
+{
+  "voting": {
+    "started": "🗳️ Голосование началось! Проголосуй прямо сейчас!",
+    "completed": "🏆 Победитель '{eventName}'!, с количеством голосов {voteCount}."
+  },
+  "events": {
+    "started": "🚀 Событие '{eventName}' началось!",
+    "completed": "🏁 Событие '{eventName}' завершилось!"
+  },
+  "websocket": {
+    "connected": "💫 '{appName}' подключено к {platformName}!",
+    "disconnected": "🚫 '{appName}' отключено!"
+  }
+}

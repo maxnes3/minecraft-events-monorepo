@@ -1,0 +1,23 @@
+{
+  "config": {
+    "app_name": "Streaming Events App"
+  },
+  "auth": {
+    "logout_label": "Logout"
+  },
+  "platforms": {
+    "twitch_name": "Twitch",
+    "youtube_name": "Youtube"
+  },
+  "games": {
+    "connect_game_label": "🚀 Connect to game",
+    "connect_token_copied_label": "✅ Token copied!"
+  },
+  "errors": {
+    "unauthorized_message": "Authorization error!",
+    "unknown_message": "Unknown error!"
+  },
+  "external": {
+    "github_label": "Github"
+  }
+}
